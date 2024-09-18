@@ -1,8 +1,12 @@
 import { BrowserRouter as BrowserRouter, Routes, Route } from 'react-router-dom';
 import React from'react';
 import './App.css';
-import DriverLogin from './Pages/DriverLogin';
+import DriverLogin from './Pages/DriverPages/DriverLogin';
 import Home from './Pages/Home';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import DriverRegister from './Pages/DriverPages/DriverRegister';
+
+
 
 function App() {
   
@@ -14,6 +18,8 @@ function App() {
         <Route path="/" element={<Home/>}></Route>
         <Route path="/Home" element={<Home/>}></Route>
         <Route path="/DriverLogin" element={<DriverLogin/>}></Route>
+        <Route path="/DriverRegister" element={<DriverRegister/>}></Route>
+        
       </Routes>
       </BrowserRouter>
     </div>
