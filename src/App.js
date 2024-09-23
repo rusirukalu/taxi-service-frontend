@@ -5,6 +5,7 @@ import DriverLogin from './Pages/DriverPages/DriverLogin';
 import Home from './Pages/Home';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DriverRegister from './Pages/DriverPages/DriverRegister';
+import DriverDashboard from './Pages/DriverPages/DriverDashboard';
 
 
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/Home" element={<Home/>}></Route>
         <Route path="/DriverLogin" element={<DriverLogin/>}></Route>
         <Route path="/DriverRegister" element={<DriverRegister/>}></Route>
+        <Route path="/DriverDashboard" element={<DriverDashboard/>}></Route>
         
       </Routes>
       </BrowserRouter>

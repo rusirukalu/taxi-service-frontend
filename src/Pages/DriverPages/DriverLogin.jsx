@@ -6,9 +6,7 @@ import NavBar from '../../components/Navbar';
 export default function DriverLogin() {
   return (
     <div>
-      <NavBar />
-       
-      
+      <NavBar />    
       <Container className="p-3 my-5 h-custom">
         <Row>
           <Col md={6}>
@@ -18,7 +16,7 @@ export default function DriverLogin() {
               alt="Sample"
             />
           </Col>
-
+ 
           <Col md={6}>
             <div className="d-flex flex-row align-items-center justify-content-center mb-4">
               <p className="lead fw-normal mb-0 me-3">Sign in with</p>
