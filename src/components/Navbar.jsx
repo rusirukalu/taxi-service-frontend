@@ -1,46 +1,29 @@
-import React from 'react';
-import { MDBNavbar, MDBContainer, MDBNavbarBrand, MDBNavbarToggler, MDBIcon, MDBCollapse, MDBNavbarNav, MDBNavbarItem, MDBNavbarLink } from 'mdb-react-ui-kit';
+import React, { useState } from 'react';
+import { Navbar, Container, Nav } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // NavBar Component Code
-
 export default function NavBar() {
-  const [showNav, setShowNav] = React.useState(false);
-
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <MDBNavbar expand='lg' light bgColor='light'>
-      <MDBContainer fluid>
-        <MDBNavbarBrand href='#'>Taxi Service</MDBNavbarBrand>
-        <MDBNavbarToggler
-          aria-controls='navbarExample01'
-          aria-expanded='false'
-          aria-label='Toggle navigation'
-          onClick={() => setShowNav(!showNav)}
-        >
-          <MDBIcon icon='bars' fas />
-        </MDBNavbarToggler>
-        <MDBCollapse navbar show={showNav}>
-          <MDBNavbarNav className='mb-2 mb-lg-0'>
-            <MDBNavbarItem>
-              <MDBNavbarLink active aria-current='page' href='./Home'>
-                Home
-              </MDBNavbarLink>
-            </MDBNavbarItem>
-            <MDBNavbarItem>
-              <MDBNavbarLink href='#'>Services</MDBNavbarLink>
-            </MDBNavbarItem>
-            <MDBNavbarItem>
-              <MDBNavbarLink href='#'>About</MDBNavbarLink>
-            </MDBNavbarItem>
-            <MDBNavbarItem>
-              <MDBNavbarLink href='#'>Passengers</MDBNavbarLink>
-            </MDBNavbarItem>
-            <MDBNavbarItem>
-              <MDBNavbarLink href='./DriverLogin'>Drivers</MDBNavbarLink>
-            </MDBNavbarItem>
-          </MDBNavbarNav>
-        </MDBCollapse>
-      </MDBContainer>
-    </MDBNavbar>
+    <Navbar expanded={expanded} expand="lg" bg="light" variant="light">
+      <Container fluid>
+        <Navbar.Brand href="#">Taxi Service</Navbar.Brand>
+        <Navbar.Toggle 
+          aria-controls="navbarScroll" 
+          onClick={() => setExpanded(expanded ? false : "expanded")} 
+        />
+        <Navbar.Collapse id="navbarScroll">
+          <Nav className="me-auto my-2 my-lg-0" navbarScroll>
+            <Nav.Link href="./Home">Home</Nav.Link>
+            <Nav.Link href="#">Services</Nav.Link>
+            <Nav.Link href="#">About</Nav.Link>
+            <Nav.Link href="#">Passengers</Nav.Link>
+            <Nav.Link href="./DriverLogin">Drivers</Nav.Link>
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 }

@@ -1,14 +1,70 @@
 import React from 'react';
+import { useState } from 'react';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import NavBar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
 
 // Driver Login Page using React Bootstrap
 export default function DriverLogin() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+     // Show loading alert
+     Swal.fire({
+      title: 'Logging in...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/v1/driver/login', {
+        email,
+        password,
+      });
+      // Extract the token from the response
+      const { token } = response.data;
+      console.log("Login successful, token: ", token);
+
+      // Show success alert with the token
+      Swal.fire({
+        icon: 'success',
+        title: 'Login successful!',
+        text: `Your token is: ${token}`,
+        showConfirmButton: true,
+        confirmButtonText: 'OK',
+      });
+
+     // Optionally, save the token to localStorage
+     localStorage.setItem('driverToken', token);
+
+      // Redirect to dashboard page
+      window.location.href = '/DriverDashboard';
+
+    } catch (error) {
+      // Show error alert
+      Swal.fire({
+        icon: 'error',
+        title: 'Login failed!',
+        text: error.response?.data?.message || 'Please try again.',
+        showConfirmButton: true,
+        confirmButtonText: 'Retry',
+      });
+    }
+  };
+
   return (
     <div>
+
       <NavBar />
-       
-      
       <Container className="p-3 my-5 h-custom">
         <Row>
           <Col md={6}>
@@ -39,15 +95,22 @@ export default function DriverLogin() {
               <hr className="flex-grow-1" />
             </div>
 
-            <Form>
+
+            <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-4">
                 <Form.Label>Email address</Form.Label>
-                <Form.Control type="email" placeholder="Enter email" size="lg" />
+                <Form.Control type="email" placeholder="Enter email" size="lg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)} />
+
               </Form.Group>
 
               <Form.Group className="mb-4">
                 <Form.Label>Password</Form.Label>
-                <Form.Control type="password" placeholder="Password" size="lg" />
+                <Form.Control type="password" placeholder="Password" size="lg"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)} />
+
               </Form.Group>
 
               <div className="d-flex justify-content-between mb-4">
@@ -56,7 +119,7 @@ export default function DriverLogin() {
               </div>
 
               <div className="text-center text-md-start mt-4 pt-2">
-                <Button variant="primary" size="lg" className="px-5">
+                <Button variant="warning" type='submit' size="lg" className="px-5" >
                   Login
                 </Button>
                 <p className="small fw-bold mt-2 pt-1 mb-2">
@@ -67,25 +130,10 @@ export default function DriverLogin() {
           </Col>
         </Row>
 
-        
+
       </Container>
-      <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary mt-5">
-          <div className="text-white mb-3 mb-md-0">Copyright © 2024. All rights reserved.</div>
-          <div>
-            <Button variant="link" className="text-white mx-2">
-              <i className="fab fa-facebook-f"></i>
-            </Button>
-            <Button variant="link" className="text-white mx-2">
-              <i className="fab fa-twitter"></i>
-            </Button>
-            <Button variant="link" className="text-white mx-2">
-              <i className="fab fa-google"></i>
-            </Button>
-            <Button variant="link" className="text-white mx-2">
-              <i className="fab fa-linkedin-in"></i>
-            </Button>
-          </div>
-        </div>
+
+      <Footer />
     </div>
   );
 }
