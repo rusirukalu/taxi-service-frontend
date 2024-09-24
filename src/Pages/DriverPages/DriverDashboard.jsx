@@ -1,15 +1,29 @@
 import React from 'react';
-import { Container, Row, Col, Card, Button, ListGroup, ProgressBar, Navbar } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';  // Ensure useNavigate is imported
+import { useEffect } from 'react';
+import { Container, Row, Col, Card, Button, ListGroup, ProgressBar } from 'react-bootstrap';
 import NavBar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import Logout from '../../components/Logout';
+import Swal from 'sweetalert2';
 
 
 export default function DriverDashboard() {
+
+
+
   return (
     <div>
-      <NavBar/>
+      {/*Navigation Bar */}
+      <NavBar />
+
+     
+      
+      
     <Container fluid className="p-4">
       
       <h2 className="mb-4">Driver's Dashboard</h2>
+      
 
       {/* Summary Cards */}
       <Row className="mb-4">
@@ -92,6 +106,9 @@ export default function DriverDashboard() {
         </Col>
       </Row>
     </Container>
+
+    <Logout/>
+    <Footer/>
     </div>
   );
 }
