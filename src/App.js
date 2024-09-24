@@ -4,7 +4,7 @@ import './App.css';
 import DriverLogin from './Pages/DriverLogin';
 import Home from './Pages/Home';
 import PassengerLogin from './Pages/PassengerLogin';
-import PassengerRegister from './Pages/PassengerRegister';
+import PassengerRegister from './Pages/PassengerPages/PassengerRegister';
 
 function App() {
   return (

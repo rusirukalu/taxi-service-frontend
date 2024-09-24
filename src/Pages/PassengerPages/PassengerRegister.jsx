@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Container, Row, Col, Card, Form, Image } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaLock, FaPhone  } from 'react-icons/fa';
-import NavBar from  '../components/Navbar';
+import NavBar from  '../../components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
