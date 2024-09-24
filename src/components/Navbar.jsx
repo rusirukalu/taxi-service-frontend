@@ -33,7 +33,7 @@ export default function NavBar() {
               <MDBNavbarLink href='#'>About</MDBNavbarLink>
             </MDBNavbarItem>
             <MDBNavbarItem>
-              <MDBNavbarLink href='#'>Passenger</MDBNavbarLink>
+              <MDBNavbarLink href='./PassengerLogin'>Passenger</MDBNavbarLink>
             </MDBNavbarItem>
             <MDBNavbarItem>
               <MDBNavbarLink href='./DriverLogin'>Driver</MDBNavbarLink>
