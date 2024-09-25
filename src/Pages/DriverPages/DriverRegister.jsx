@@ -3,7 +3,6 @@ import { Button, Container, Row, Col, Card, Form, Image } from 'react-bootstrap'
 import { FaUser, FaEnvelope, FaLock, FaPhone } from 'react-icons/fa';
 import NavBar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -167,7 +166,7 @@ export default function DriverRegister() {
         
       </Container>
 
-      
+
       <Footer/>
       
     </div>
