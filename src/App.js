@@ -6,7 +6,8 @@ import Home from './Pages/Home';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DriverRegister from './Pages/DriverPages/DriverRegister';
 import DriverDashboard from './Pages/DriverPages/DriverDashboard';
-
+import PassengerLogin from './Pages/PassengerPages/PassengerLogin';
+import PassengerRegister from './Pages/PassengerPages/PassengerRegister';
 
 
 function App() {
@@ -21,7 +22,8 @@ function App() {
         <Route path="/DriverLogin" element={<DriverLogin/>}></Route>
         <Route path="/DriverRegister" element={<DriverRegister/>}></Route>
         <Route path="/DriverDashboard" element={<DriverDashboard/>}></Route>
-        
+        <Route path="/PassengerLogin" element={<PassengerLogin/>}></Route>
+        <Route path="/PassengerRegister" element={<PassengerRegister/>}></Route>
       </Routes>
       </BrowserRouter>
     </div>
