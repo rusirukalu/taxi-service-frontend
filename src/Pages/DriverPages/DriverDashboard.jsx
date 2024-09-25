@@ -4,12 +4,20 @@ import { Container, Row, Col, Card, Button, ListGroup, ProgressBar, Image } from
 import NavBar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Logout from '../../components/Logout';
+import EditProfileModal from '../../components/Driver/EditProfileModal';
 import axios from 'axios';
 
 
 
 export default function DriverDashboard() {
-  const [driver, setDriver] = useState({ fullName: '', email: '' });
+  const [driver, setDriver] = useState({ fullName: '', email: '', username: '', nic: '', phone: '', address: ''});
+  const [showModal, setShowModal] = useState(false);  // Modal visibility state
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editUsername, setEditUsername] = useState('');
+  const [editNic, setEditNic] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editAddress, setEditAddress] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,14 +31,43 @@ export default function DriverDashboard() {
       })
       .then(response => {
         console.log('Driver Profile:', response.data.data);
-        setDriver(response.data.data); // Set the driver details into state
+        const driverData = response.data.data;
+        setDriver(driverData);
+        
+        // Set edit fields with fetched profile data
+        setEditName(driverData.fullName);
+        setEditEmail(driverData.email);
+        setEditUsername(driverData.username);
+        setEditNic(driverData.nic);
+        setEditPhone(driverData.phone);
+        setEditAddress(driverData.address);
       })
       .catch(error => {
         console.error('Error fetching driver profile:', error);
-        navigate('/DriverLogin'); // Redirect if there is an error
+        navigate('/DriverDashboard'); // Redirect if there is an error
       });
     }
   }, [navigate]);
+
+   // Handle modal open
+   const handleShow = () => setShowModal(true);
+
+   // Handle modal close
+   const handleClose = () => setShowModal(false);
+ 
+   // Handle form submission (e.g., update profile)
+   const handleSaveChanges = () => {
+     // Add logic to save changes (e.g., send update request to backend)
+     console.log('Updated name:', editName);
+     console.log('Updated email:', editEmail);
+     console.log('Updated username:', editUsername);
+    console.log('Updated NIC:', editNic);
+    console.log('Updated phone:', editPhone);
+    console.log('Updated address:', editAddress);
+ 
+     // Close the modal after saving
+     setShowModal(false);
+   };
 
   return (
     <div>
@@ -129,9 +166,28 @@ export default function DriverDashboard() {
               />
               <p className="mt-3"><strong>Name:</strong>{driver?.name || 'Loading...'}</p>
               <p><strong>Email:</strong>kavindu</p>
-              <Button variant="warning">Edit Profile</Button>
+              <Button variant="warning" onClick={handleShow}>Edit Profile</Button>
             </Card.Body>
           </Card>
+
+          {/* Use the EditProfileModal component */}
+      <EditProfileModal
+        show={showModal}
+        handleClose={handleClose}
+        editName={editName}
+        setEditName={setEditName}
+        editEmail={editEmail}
+        setEditEmail={setEditEmail}
+        editUsername={editUsername}
+        setEditUsername={setEditUsername}
+        editNic={editNic}
+        setEditNic={setEditNic}
+        editPhone={editPhone}
+        setEditPhone={setEditPhone}
+        editAddress={editAddress}
+        setEditAddress={setEditAddress}
+        handleSaveChanges={handleSaveChanges}
+      />
           </Col>
         </Row>
       </Container>
