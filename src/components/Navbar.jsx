@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Navbar, Container, Nav } from 'react-bootstrap';
+import { Navbar, Container, Nav, Image } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import logo from '../Images/logo.jpg';
 
 // NavBar Component Code
 export default function NavBar() {
@@ -9,7 +10,17 @@ export default function NavBar() {
   return (
     <Navbar expanded={expanded} expand="lg" bg="light" variant="light">
       <Container fluid>
-        <Navbar.Brand href="#">Taxi Service</Navbar.Brand>
+      <Image 
+        src={logo}
+        alt=""
+        width="50" 
+        height="50"
+        className="d-inline-block align-top" /> 
+        
+        <Navbar.Brand href="#">
+       
+          City Taxi
+          </Navbar.Brand>
         <Navbar.Toggle 
           aria-controls="navbarScroll" 
           onClick={() => setExpanded(expanded ? false : "expanded")} 
