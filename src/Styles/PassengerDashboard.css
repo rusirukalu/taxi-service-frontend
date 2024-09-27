@@ -1,0 +1,90 @@
+.passenger-dashboard {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-view {
+  margin-bottom: 20px;
+  width: 100%; /* Make the map full width */
+  max-width: 800px; /* Set a maximum width */
+  border: 1px solid #ccc; /* Optional: Add border for visual separation */
+  margin-left: auto; /* Center the map horizontally */
+  margin-right: auto; /* Center the map horizontally */
+}
+
+.trip-type-selector {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center; /* Center-align radio buttons */
+  gap: 15px; /* Space between radio button groups */
+}
+
+.trip-type-selector label {
+  display: flex;
+  align-items: center; /* Align label text with radio buttons */
+}
+
+.later-section {
+  margin-bottom: 20px;
+  width: 100%; /* Ensure it occupies full width */
+  max-width: 800px; /* Set a maximum width */
+  display: flex;
+  justify-content: center; /* Center-align the button */
+}
+
+.later-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.later-header span {
+  margin-left: 5px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.location-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Full width for inputs */
+  max-width: 800px; /* Set a maximum width */
+  margin-left: auto; /* Center the inputs horizontally */
+  margin-right: auto; /* Center the inputs horizontally */
+}
+
+.pickup, .drop {
+  margin-bottom: 15px;
+  width: 100%; /* Ensure each section occupies full width */
+}
+
+.pickup input,
+.drop input {
+  width: 100%; /* Make input fields full width */
+  padding: 10px; /* Add padding for better appearance */
+  border: 1px solid #ccc; /* Optional: Add border to inputs */
+  border-radius: 5px; /* Rounded corners */
+}
+
+.later-btn {
+  display: flex;
+  align-items: center;
+  background-color: #ffd700;
+  color: black; /* Change text color to black for contrast */
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s; /* Smooth transition on hover */
+  margin: 0 auto; /* Center the button horizontally */
+}
+
+.later-btn svg {
+  margin-right: 8px;
+}
+
+.later-btn:hover {
+  background-color: #ffee00; /* Change color on hover for better visibility */
+}

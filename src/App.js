@@ -8,6 +8,8 @@ import DriverRegister from './Pages/DriverPages/DriverRegister';
 import DriverDashboard from './Pages/DriverPages/DriverDashboard';
 import PassengerLogin from './Pages/PassengerPages/PassengerLogin';
 import PassengerRegister from './Pages/PassengerPages/PassengerRegister';
+import PassengerDashboard from './Pages/PassengerPages/PassengerDashboard';
+
 
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
         <Route path="/DriverDashboard" element={<DriverDashboard/>}></Route>
         <Route path="/PassengerLogin" element={<PassengerLogin/>}></Route>
         <Route path="/PassengerRegister" element={<PassengerRegister/>}></Route>
+        <Route path="/PassengerDashboard" element={<PassengerDashboard />}></Route> 
       </Routes>
       </BrowserRouter>
     </div>
