@@ -32,6 +32,7 @@ export default function NavBar() {
             <Nav.Link href="#">About</Nav.Link>
             <Nav.Link href="./PassengerLogin">Passengers</Nav.Link>
             <Nav.Link href="./DriverLogin">Drivers</Nav.Link>
+            <Nav.Link href="./CallOperatorLogin">Call Operator</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
