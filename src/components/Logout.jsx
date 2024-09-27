@@ -47,7 +47,7 @@ export default function Logout() {
     <div>
        {/* Logout Button outside of NavBar */}
        <div className="d-flex justify-content-center p-5">
-        <Button variant="danger" onClick={handleLogout}>
+        <Button variant="danger" onClick={handleLogout} style={{ borderRadius: '50px', width:"200px" }} >
           Logout
         </Button>
       </div>
