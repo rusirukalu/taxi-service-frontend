@@ -7,7 +7,9 @@ import Footer from '../../components/Footer';
 import Logout from '../../components/Logout';
 import EditProfileModal from '../../components/Driver/EditProfileModal';
 import MapComponent from '../../components/Driver/MapComponent';
+import RidesTable from '../../components/Driver/RidesTable';
 import RegisterVehicle from '../../components/Driver/RegisterVehicle ';
+
 import axios from 'axios';
 
 
@@ -22,21 +24,23 @@ export default function DriverDashboard() {
   const [editNic, setEditNic] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editAddress, setEditAddress] = useState('');
+  const [totalRideCount, setTotalRideCount] = useState('');
   const navigate = useNavigate();
 
   //--------------fetch driver------------------//
   useEffect(() => {
     const token = localStorage.getItem('driverToken');
+    const userDetails = localStorage.getItem('UserDetails');
+    const userDetailsParse = JSON.parse(userDetails)
 
     if (!token) {
       navigate('/DriverLogin'); // Redirect to login if no token is present
     } else {
-      axios.get('http://localhost:3000/api/v1/driver/profile', {
-        headers: { Authorization: `Bearer ${token}` }
+      axios.post('http://localhost:3000/api/v1/driver/profile/', {
+        driverId: userDetailsParse.id
       })
         .then(response => {
-          console.log('Driver Profile:', response.data.data);
-          const driverData = response.data.data;
+          const driverData = response.data.message;
           setDriver(driverData);
 
           // Set edit fields with fetched profile data
@@ -51,6 +55,15 @@ export default function DriverDashboard() {
           console.error('Error fetching driver profile:', error);
           navigate('/DriverDashboard'); // Redirect if there is an error
         });
+
+      axios.post('http://localhost:3000/api/v1/driver/get-ride-count', {
+        driverId: userDetailsParse.id
+      })
+        .then(res => {
+          setTotalRideCount(res.data.message)
+        }).catch(err => {
+          console.log(err)
+        })
     }
   }, [navigate]);
 
@@ -89,8 +102,8 @@ export default function DriverDashboard() {
       <Container fluid className="p-4" >
         <Row>
           {/*Driver Dashboard Title */}
-          <Col md={10}>
-            <h2 className="mb-4" style={{ color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center' }}>
+          <Col md={8}>
+            <h2  style={{ color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center' }}>
               Driver's Dashboard
             </h2>
           </Col>
@@ -101,6 +114,10 @@ export default function DriverDashboard() {
               <FaCar style={{ marginRight: '8px' }} />
               Add Your Vehicle
             </Button>
+          </Col>
+          <Col md={2}>
+            <Logout />
+
           </Col>
         </Row>
 
@@ -126,7 +143,9 @@ export default function DriverDashboard() {
               <Card.Body>
                 <Card.Title>Total Rides</Card.Title>
                 <Card.Text>
-                  <h3>8</h3>
+                  <h3>{
+                    totalRideCount > 0 ? totalRideCount : "Loading"
+                  }</h3>
                 </Card.Text>
                 <Button variant="success">View History</Button>
               </Card.Body>
@@ -171,16 +190,16 @@ export default function DriverDashboard() {
                   style={{ width: '120px', height: '120px' }}
                   alt="Driver Profile"
                 />
-                <p className="mt-3"><strong>Name: </strong>{driver?.name || 'Loading...'}</p>
-                <p><strong>Email: </strong>kavindu</p>
+                <p className="mt-3"><strong>Name: </strong>{driver?.fullName || 'Loading...'}</p>
+                <p><strong>Email: </strong>{driver?.email || 'Loading...'}</p>
                 <Button variant="warning" onClick={handleShow}>Edit Profile</Button>
               </Card.Body>
             </Card>
 
-<br/>
+            <br />
 
             <Card className="mb-4">
-            <Card.Header>Vehicle Details</Card.Header>
+              <Card.Header>Vehicle Details</Card.Header>
               <Card.Body className="text-center">
                 {/* Display Driver's Profile Image */}
                 <Image
@@ -223,32 +242,19 @@ export default function DriverDashboard() {
             />
           </Col>
 
-          <Col md={8}>
-            <Card className="mb-4">
-              <Card.Header>Upcoming Rides</Card.Header>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <strong>Ride #1:</strong> Pickup at 10:00 AM - Downtown
-                  <Button variant="link" className="float-right">Details</Button>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Ride #2:</strong> Pickup at 12:30 PM - Airport
-                  <Button variant="link" className="float-right">Details</Button>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Ride #3:</strong> Pickup at 2:45 PM - Shopping Mall
-                  <Button variant="link" className="float-right">Details</Button>
-                </ListGroup.Item>
-              </ListGroup>
-            </Card>
-           
-          </Col>
 
+
+          <Col md={12} >
+            <Card className="mb-4" style={{ padding: "15px" }}>
+
+              <RidesTable />
+            </Card>
+
+          </Col>
 
         </Row>
       </Container>
 
-      <Logout />
       <Footer />
     </div>
   );

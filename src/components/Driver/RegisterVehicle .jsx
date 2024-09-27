@@ -81,7 +81,9 @@ const RegisterVehicle = ({ show, handleClose }) => {
           </Form.Group>
           <br/>
           <Button variant="warning" type="submit">
-            Register Vehicle
+           {
+            vehicleNumber == "" ? " Register Vehicle" : "Update Vehicle"
+           }
           </Button>
         </Form>
       </Modal.Body>

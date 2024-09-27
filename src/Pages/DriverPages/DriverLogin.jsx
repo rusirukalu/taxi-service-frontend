@@ -31,20 +31,11 @@ export default function DriverLogin() {
         password,
       });
       // Extract the token from the response
-      const { token } = response.data;
+      const { token } = response.data.message;
       console.log("Login successful, token: ", token);
-
-      // Show success alert with the token
-      Swal.fire({
-        icon: 'success',
-        title: 'Login successful!',
-        text: `Your token is: ${token}`,
-        showConfirmButton: true,
-        confirmButtonText: 'OK',
-      });
-
      // Optionally, save the token to localStorage
      localStorage.setItem('driverToken', token);
+     localStorage.setItem('UserDetails', JSON.stringify(response.data.message.user))
 
       // Redirect to dashboard page
       window.location.href = '/DriverDashboard';
