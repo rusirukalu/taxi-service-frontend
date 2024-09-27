@@ -100,24 +100,31 @@ export default function DriverDashboard() {
       <NavBar />
 
       <Container fluid className="p-4" >
-        <Row>
-          {/*Driver Dashboard Title */}
-          <Col md={8}>
-            <h2  style={{ color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center' }}>
-              Driver's Dashboard
-            </h2>
-          </Col>
+        <Row className="align-items-center" style={{ height: '100px' }}>
 
           {/*Vehicle Register Button */}
-          <Col md={2}>
+          <Col md={4} className="d-flex justify-content-center">
             <Button variant="warning" style={{ borderRadius: '50px' }} onClick={handleShowVehicleModal}>
               <FaCar style={{ marginRight: '8px' }} />
               Add Your Vehicle
             </Button>
           </Col>
-          <Col md={2}>
-            <Logout />
 
+
+          {/*Driver Dashboard Title */}
+          <Col md={4} className="d-flex justify-content-center">
+            <h2 style={{ color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
+             }}>
+              Driver's Dashboard
+            </h2>
+          </Col>
+
+          
+
+          {/*Logout Button */}
+          <Col md={4} className="d-flex justify-content-center">
+            <Logout />
           </Col>
         </Row>
 

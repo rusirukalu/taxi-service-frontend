@@ -41,6 +41,17 @@ function RidesTable() {
     }
   };
 
+
+  // Handle completing the ride
+  const completeRide = async (rideId) => {
+    try {
+      await axios.put(`/api/rides/${rideId}`, { status: 'completed' });
+      fetchRides(); // Refresh the list after updating
+    } catch (error) {
+      console.error('Error completing ride:', error);
+    }
+  };
+
   return (
     <div>
       <h2 className="mt-1 mb-4">Rides List</h2>
@@ -49,8 +60,8 @@ function RidesTable() {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Driver ID</th>
-            <th>Passenger ID</th>
+            <th>Driver Name</th>
+            <th>Passenger Passenger</th>
             <th>Pickup Location</th>
             <th>Drop Location</th>
             <th>Duration</th>
@@ -70,9 +81,19 @@ function RidesTable() {
               <td>{ride.dropLocation}</td>
               <td>{ride.duration}</td>
               <td>{ride.distance}</td>
-              <td>{ride.cost}</td>
+              <td>LKR {ride.cost}</td>
               <td>
-                <Badge bg={ride.status === 'confirmed' ? 'success' : ride.status === 'rejected' ? 'danger' : 'warning'}>
+                <Badge
+                  bg={
+                    ride.status === 'confirmed'
+                      ? 'success'
+                      : ride.status === 'rejected'
+                        ? 'danger'
+                        : ride.status === 'completed'
+                          ? 'info'
+                          : 'warning'
+                  }
+                >
                   {ride.status}
                 </Badge>
               </td>
@@ -91,6 +112,15 @@ function RidesTable() {
                   disabled={ride.status !== 'pending'}
                 >
                   Reject
+                </Button>
+
+                <Button
+                  variant="info"
+                  className="me-2"
+                  onClick={() => completeRide(ride.id)}
+                  disabled={ride.status !== 'pending'}
+                >
+                  Complete
                 </Button>
               </td>
             </tr>

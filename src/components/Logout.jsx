@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom';  // Ensure useNavigate is imported
 import { useEffect } from 'react';
 import { Button } from 'react-bootstrap';
+import { FaArrowRight  } from 'react-icons/fa';
 
 import Swal from 'sweetalert2';
 
@@ -47,8 +48,9 @@ export default function Logout() {
     <div>
        {/* Logout Button outside of NavBar */}
        <div className="d-flex justify-content-center p-5">
-        <Button variant="danger" onClick={handleLogout} style={{ borderRadius: '50px', width:"200px" }} >
-          Logout
+        <Button variant="danger" onClick={handleLogout} style={{ borderRadius: '50px', width:"120px" }} >
+          Logout 
+          <FaArrowRight  style={{ marginLeft: '8px' }} />
         </Button>
       </div>
     </div>

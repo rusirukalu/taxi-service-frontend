@@ -13,7 +13,7 @@ const center = { lat: 6.927079, lng: 79.861244 }; // Default center (Colombo, Sr
 function MapComponent() {
   // Load Google Maps API
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "Your_Map_API_KEY",
+    googleMapsApiKey: "AIzaSyApHYUH5MfQaCitqMVVbp58DkPYExV6Iw8",
     libraries: ['places'], // Include necessary libraries
   });
 
@@ -113,7 +113,7 @@ function MapComponent() {
       distance,
       duration,
       cost,
-      vehicleType,
+      
     };
 
     console.log('Booking data:', bookingData);
