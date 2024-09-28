@@ -6,10 +6,10 @@ import Swal from 'sweetalert2';
 
 const RegisterVehicle = ({ show, handleClose }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
-  const [vehicleType, setVehicleType] = useState('');
+  const [vehicleType, setVehicleType] = useState('standard'); // Default vehicle type
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleColor, setVehicleColor] = useState('');
-  const [vehicleOwner, setVehicleOwner] = useState('');
+  const [vehicleOwner, setVehicleOwner] = useState('me'); // Default vehicle owner
   const [vehicleImageUrl, setVehicleImageUrl] = useState(''); // State to store image URL
 
   // Handle image URL change
@@ -72,15 +72,22 @@ const RegisterVehicle = ({ show, handleClose }) => {
               required
             />
           </Form.Group>
+          
+          {/* Vehicle Type Dropdown */}
           <Form.Group controlId="formVehicleType">
             <Form.Label>Vehicle Type</Form.Label>
             <Form.Control
-              type="text"
+              as="select" // Change to dropdown
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
               required
-            />
+            >
+              <option value="standard">Standard</option>
+              <option value="bike">Bike</option>
+              <option value="luxury">Luxury</option>
+            </Form.Control>
           </Form.Group>
+
           <Form.Group controlId="formVehicleModel">
             <Form.Label>Vehicle Model</Form.Label>
             <Form.Control
@@ -99,15 +106,21 @@ const RegisterVehicle = ({ show, handleClose }) => {
               required
             />
           </Form.Group>
-          <Form.Group controlId="formVehicleOwner">
+          
+           {/* Vehicle Owner Dropdown */}
+           <Form.Group controlId="formVehicleOwner">
             <Form.Label>Vehicle Owner</Form.Label>
             <Form.Control
-              type="text"
+              as="select" // Change to dropdown
               value={vehicleOwner}
               onChange={(e) => setVehicleOwner(e.target.value)}
               required
-            />
+            >
+              <option value="me">Me</option>
+              <option value="otherPerson">Other Person</option>
+            </Form.Control>
           </Form.Group>
+
           <br/>
           <Button variant="warning" type="submit">
             {vehicleNumber === '' ? 'Register Vehicle' : 'Update Vehicle'}
