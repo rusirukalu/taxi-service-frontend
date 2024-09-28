@@ -1,7 +1,7 @@
-import { extendTheme } from "@chakra-ui/react";
+
 
 // Ensure breakpoints are included in the theme
-const theme = extendTheme({
+const theme = ç({
   breakpoints: {
     sm: "30em",
     md: "48em",

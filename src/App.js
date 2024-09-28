@@ -11,7 +11,6 @@ import PassengerRegister from './Pages/PassengerPages/PassengerRegister';
 import PassengerDashboard from './Pages/PassengerPages/PassengerDashboard';
 import CallOperatorLogin from './Pages/CallOperator/CallOperatorLogin';
 import RideBooking from './Pages/CallOperator/RideBooking';  
-import { ChakraProvider } from '@chakra-ui/react';
 import { createRoot } from 'react-dom/client';
 import theme from './theme';
 import CallOperatorDashboard from './Pages/CallOperator/CallOperatorDashboard';
@@ -24,9 +23,9 @@ const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
 
 root.render(
-  <ChakraProvider theme={theme}>  {/* Wrapping app with ChakraProvider */}
+  <React.StrictMode>
     <App />
-  </ChakraProvider>
+  </React.StrictMode>
 );
 
 function App() {

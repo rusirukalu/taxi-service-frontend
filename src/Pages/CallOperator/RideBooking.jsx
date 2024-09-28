@@ -1,16 +1,13 @@
 import {
-  Box,
   Button,
   ButtonGroup,
-  Flex,
-  HStack,
-  IconButton,
-  Input,
-  SkeletonText,
-  Text,
-  Select,
-  VStack,
-} from '@chakra-ui/react';
+  Form,
+  InputGroup,
+  Row,
+  Col,
+  OverlayTrigger,
+  Tooltip,
+} from 'react-bootstrap';
 import { FaLocationArrow, FaTimes } from 'react-icons/fa';
 import {
   useJsApiLoader,
@@ -53,7 +50,7 @@ function RideBooking() {
   const destinationRef = useRef();
 
   if (!isLoaded) {
-    return <SkeletonText />;
+    return <div>Loading...</div>; // Temporary loading state
   }
 
   // Calculate route and price
@@ -90,14 +87,8 @@ function RideBooking() {
   }
 
   return (
-    <Flex
-      position="relative"
-      flexDirection="column"
-      alignItems="center"
-      h="100vh"
-      w="100vw"
-    >
-      <Box position="absolute" left={0} top={0} h="100%" w="100%">
+    <div style={{ position: 'relative', height: '100vh', width: '100vw' }}>
+      <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '100%' }}>
         {/* Google Map Box */}
         <GoogleMap
           center={center}
@@ -116,63 +107,68 @@ function RideBooking() {
             <DirectionsRenderer directions={directionsResponse} />
           )}
         </GoogleMap>
-      </Box>
-      <Box
-        p={4}
-        borderRadius="lg"
-        m={4}
-        bgColor="white"
-        shadow="base"
-        minW="container.md"
-        zIndex="1"
-      >
-        <VStack spacing={4} alignItems="stretch">
-          <HStack spacing={2} justifyContent="space-between">
-            <Box flexGrow={1}>
+      </div>
+      <div style={{ padding: '16px', borderRadius: '8px', margin: '16px', backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', minWidth: '600px', position: 'relative', zIndex: 1 }}>
+        <Row className="mb-3">
+          <Col>
+            <InputGroup>
               <Autocomplete>
-                <Input type="text" placeholder="Origin" ref={originRef} />
+                <Form.Control type="text" placeholder="Origin" ref={originRef} />
               </Autocomplete>
-            </Box>
-            <Box flexGrow={1}>
+            </InputGroup>
+          </Col>
+          <Col>
+            <InputGroup>
               <Autocomplete>
-                <Input type="text" placeholder="Destination" ref={destinationRef} />
+                <Form.Control type="text" placeholder="Destination" ref={destinationRef} />
               </Autocomplete>
-            </Box>
-
+            </InputGroup>
+          </Col>
+          <Col xs="auto">
             <ButtonGroup>
-              <Button colorScheme="green" type="submit" onClick={calculateRoute}>
+              <Button variant="success" onClick={calculateRoute}>
                 Calculate Route
               </Button>
-              <IconButton
-                aria-label="clear route"
-                icon={<FaTimes />}
-                onClick={clearRoute}
-              />
+              <OverlayTrigger
+                placement="top"
+                overlay={<Tooltip id="tooltip-top">Clear Route</Tooltip>}
+              >
+                <Button variant="danger" onClick={clearRoute}>
+                  <FaTimes />
+                </Button>
+              </OverlayTrigger>
             </ButtonGroup>
-          </HStack>
+          </Col>
+        </Row>
 
-          {/* Vehicle and Price Section */}
-          <HStack spacing={4} justifyContent="space-between">
-            <Select
-              placeholder="Select vehicle"
+        {/* Vehicle and Price Section */}
+        <Row className="mb-3">
+          <Col xs="auto">
+            <Form.Select
               onChange={(e) => setSelectedVehicle(e.target.value)}
               value={selectedVehicle}
             >
+              <option value="">Select vehicle</option>
               <option value="economy">Economy</option>
               <option value="premium">Premium</option>
               <option value="suv">SUV</option>
-            </Select>
-            <Text>Distance: {distance}</Text>
-            <Text>Duration: {duration}</Text>
-            <Text>Total Price: ${price}</Text>
-          </HStack>
+            </Form.Select>
+          </Col>
+          <Col>
+            <span>Distance: {distance}</span>
+          </Col>
+          <Col>
+            <span>Duration: {duration}</span>
+          </Col>
+          <Col>
+            <span>Total Price: ${price}</span>
+          </Col>
+        </Row>
 
-          <HStack spacing={4} mt={4} justifyContent="space-between">
-            <IconButton
-              aria-label="center map"
-              icon={<FaLocationArrow />}
-              isRound
-              size="sm" // Make the location button small
+        <Row>
+          <Col xs="auto">
+            <Button
+              variant="primary"
               onClick={() => {
                 // Check if geolocation is available in the browser
                 if (navigator.geolocation) {
@@ -193,19 +189,21 @@ function RideBooking() {
                   alert("Geolocation is not supported by your browser.");
                 }
               }}
-            />
-            
-            <Button 
-              colorScheme="blue" 
-              size="sm" // Make the back button small
+            >
+              <FaLocationArrow /> Center Map
+            </Button>
+          </Col>
+          <Col xs="auto">
+            <Button
+              variant="info"
               onClick={() => navigate('/CallOperatorDashboard')}
             >
               Back to Dashboard
             </Button>
-          </HStack>
-        </VStack>
-      </Box>
-    </Flex>
+          </Col>
+        </Row>
+      </div>
+    </div>
   );
 }
 
