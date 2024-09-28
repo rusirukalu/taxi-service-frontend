@@ -13,7 +13,7 @@ const center = { lat: 6.927079, lng: 79.861244 };
 
 function PassengerDashboard() {
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: 'AIzaSyApHYUH5MfQaCitqMVVbp58DkPYExV6Iw8',
+    googleMapsApiKey: 'Api-key',
     libraries: ['places'],
   });
 
