@@ -10,7 +10,6 @@ import MapComponent from '../../components/Driver/MapComponent';
 import RidesTable from '../../components/Driver/RidesTable';
 import RegisterVehicle from '../../components/Driver/RegisterVehicle ';
 import ChatComponent from '../../components/Driver/ChatComponent';
-
 import axios from 'axios';
 
 
