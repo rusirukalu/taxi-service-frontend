@@ -22,14 +22,6 @@
   background-color: #dc3545; /* Red button for clear */
 }
 
-.btn {
-  background-color: #007bff; /* Blue button for booking */
-  color: white;
-}
-
-.btn:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-}
 
 .vehicle-type-card {
   cursor: pointer;
