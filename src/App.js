@@ -9,8 +9,25 @@ import DriverDashboard from './Pages/DriverPages/DriverDashboard';
 import PassengerLogin from './Pages/PassengerPages/PassengerLogin';
 import PassengerRegister from './Pages/PassengerPages/PassengerRegister';
 import PassengerDashboard from './Pages/PassengerPages/PassengerDashboard';
+import CallOperatorLogin from './Pages/CallOperator/CallOperatorLogin';
+import RideBooking from './Pages/CallOperator/RideBooking';  
+import { ChakraProvider } from '@chakra-ui/react';
+import { createRoot } from 'react-dom/client';
+import theme from './theme';
+import CallOperatorDashboard from './Pages/CallOperator/CallOperatorDashboard';
+import AddPassenger from './Pages/CallOperator/AddPassenger';
 
+// Get the root DOM element
+const rootElement = document.getElementById('root');
 
+// Create the root and render the application
+const root = createRoot(rootElement);
+
+root.render(
+  <ChakraProvider theme={theme}>  {/* Wrapping app with ChakraProvider */}
+    <App />
+  </ChakraProvider>
+);
 
 function App() {
   
@@ -26,7 +43,13 @@ function App() {
         <Route path="/DriverDashboard" element={<DriverDashboard/>}></Route>
         <Route path="/PassengerLogin" element={<PassengerLogin/>}></Route>
         <Route path="/PassengerRegister" element={<PassengerRegister/>}></Route>
-        <Route path="/PassengerDashboard" element={<PassengerDashboard />}></Route> 
+        <Route path="/PassengerDashboard" element={<PassengerDashboard />}></Route>
+        <Route path="/CallOperatorLogin" element={<CallOperatorLogin />}></Route>
+        <Route path="/RideBooking" element={<RideBooking />}></Route>
+        <Route path="/CallOperatorDashboard" element={<CallOperatorDashboard />}></Route>
+        <Route path="/AddPassenger" element={<AddPassenger />}></Route>
+        
+
       </Routes>
       </BrowserRouter>
     </div>

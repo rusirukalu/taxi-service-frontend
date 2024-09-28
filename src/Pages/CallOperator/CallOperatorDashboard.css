@@ -1,0 +1,22 @@
+.dashboard-container {
+    margin-top: 50px;
+  }
+  
+  .dashboard-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  .button-row {
+    margin-top: 20px;
+  }
+  
+  button {
+    font-size: 1.5rem;
+    padding: 15px;
+  }
