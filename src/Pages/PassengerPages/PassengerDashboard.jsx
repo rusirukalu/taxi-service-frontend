@@ -8,6 +8,10 @@ import {
 } from '@react-google-maps/api';
 import { Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
 import { FaTimes, FaMotorcycle, FaCar, FaTaxi } from 'react-icons/fa';
+import axios from 'axios';  // Import Axios for API requests
+import '../../Styles/PassengerDashboard.css';
+import NavBar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 
 const center = { lat: 6.927079, lng: 79.861244 };
 
@@ -25,7 +29,6 @@ function PassengerDashboard() {
   const [currentLocation, setCurrentLocation] = useState(center);
   const [currentPlaceName, setCurrentPlaceName] = useState('');
   const [vehicleType, setVehicleType] = useState('standard');
-
   const destiantionRef = useRef();
 
   useEffect(() => {
@@ -79,6 +82,11 @@ function PassengerDashboard() {
       return;
     }
 
+    setDirectionsResponse(null);
+    setDistance('');
+    setDuration('');
+    setCost(0);
+
     const directionsService = new window.google.maps.DirectionsService();
     const results = await directionsService.route({
       origin: currentLocation,
@@ -86,14 +94,18 @@ function PassengerDashboard() {
       travelMode: window.google.maps.TravelMode.DRIVING,
     });
 
-    setDirectionsResponse(results);
-    const distance = results.routes[0].legs[0].distance.text;
-    const duration = results.routes[0].legs[0].duration.text;
+    if (results && results.routes.length) {
+      setDirectionsResponse(results);
+      const distance = results.routes[0].legs[0].distance.text;
+      const duration = results.routes[0].legs[0].duration.text;
 
-    const rideCost = calculateCost(distance, vehicleType);
-    setCost(rideCost);
-    setDistance(distance);
-    setDuration(duration);
+      const rideCost = calculateCost(distance, vehicleType);
+      setCost(rideCost);
+      setDistance(distance);
+      setDuration(duration);
+    } else {
+      console.error('No route found');
+    }
   }
 
   function clearRoute() {
@@ -101,11 +113,12 @@ function PassengerDashboard() {
     setDistance('');
     setDuration('');
     setCost(0);
-    destiantionRef.current.value = '';
-    
-    // Center the map back to the current location
+    if (destiantionRef.current) {
+      destiantionRef.current.value = '';
+    }
     if (map) {
-      map.setCenter(currentLocation);
+      map.panTo(currentLocation);
+      map.setZoom(15);
     }
   }
 
@@ -120,109 +133,136 @@ function PassengerDashboard() {
       vehicleType,
     };
 
-    console.log(bookingData);
+    try {
+      const response = await axios.post('/api/book-ride', bookingData);
+      if (response.status === 200) {
+        alert('Ride booked successfully!');
+      } else {
+        alert('Failed to book the ride.');
+      }
+    } catch (error) {
+      console.error('Error booking ride:', error);
+      alert('Error booking ride.');
+    }
   }
 
   return (
-    <Container fluid className="p-0" style={{ height: '100vh' }}>
-      <GoogleMap
-        center={currentLocation}
-        zoom={15}
-        mapContainerStyle={{ width: '100%', height: '100%' }}
-        options={{
-          zoomControl: true,
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false,
-        }}
-        onLoad={(map) => setMap(map)}
-      >
-        <Marker position={currentLocation} />
-        {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
-      </GoogleMap>
 
-      <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1 }}>
-        <Card>
-          <Card.Body>
-            <Card.Title className="text-center">Book a Ride</Card.Title>
-            <Form>
-              <Row>
-                <Col>
-                  <Form.Group controlId="formCurrentLocation">
-                    <Form.Control
-                      type="text"
-                      placeholder="Current Location"
-                      value={currentPlaceName}
-                      readOnly
-                      style={{ cursor: 'not-allowed', width: '200px' }}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formDestination">
-                    <Autocomplete
-                      onPlaceChanged={() => {
-                        const destination = destiantionRef.current.value;
-                        calculateRoute(destination);
-                      }}
-                    >
+    <Container fluid className="p-0" style={{ height: '100vh' }}>
+      <NavBar/>
+      <Row style={{ height: '60%' }}>
+        <GoogleMap
+          center={currentLocation}
+          zoom={15}
+          mapContainerStyle={{ width: '100%', height: '100%' }}
+          options={{
+            zoomControl: true,
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: false,
+          }}
+          onLoad={(map) => setMap(map)}
+        >
+          <Marker position={currentLocation} />
+          {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
+        </GoogleMap>
+      </Row>
+
+      <Row className="justify-content-center align-items-center" style={{ padding: '20px', height: '40%' }}>
+        <Col md={6}>
+          <Card>
+            <Card.Body>
+              <Card.Title className="text-center">Book a Ride</Card.Title>
+              <Form>
+                <Row>PICKUP</Row> 
+                <Row>
+                  <Col>
+                    <Form.Group controlId="formCurrentLocation">
                       <Form.Control
                         type="text"
-                        placeholder="Destination"
-                        ref={destiantionRef}
-                        style={{ width: '200px' }}
+                        placeholder="Current Location"
+                        value={currentPlaceName}
+                        readOnly
+                        style={{ cursor: 'not-allowed', width: '200px' }}
                       />
-                    </Autocomplete>
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Button variant="danger" onClick={clearRoute}>
-                    <FaTimes />
-                  </Button>
-                </Col>
-              </Row>
-
-              <Row className="mt-3">
-                {['standard', 'bike', 'luxury'].map(type => (
-                  <Col key={type} md={4} className="mb-2">
-                    <Card
-                      border={vehicleType === type ? 'primary' : 'light'}
-                      className="text-center"
-                      onClick={() => {
-                        setVehicleType(type);
-                        const rideCost = calculateCost(distance, type);
-                        setCost(rideCost);
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <Card.Body>
-                        {type === 'standard' && <FaCar size={30} />}
-                        {type === 'bike' && <FaMotorcycle size={30} />}
-                        {type === 'luxury' && <FaTaxi size={30} />}
-                        <Card.Title>{type.charAt(0).toUpperCase() + type.slice(1)}</Card.Title>
-                        <Card.Text>
-                          Cost: LKR {calculateCost(distance, type)}
-                        </Card.Text>
-                      </Card.Body>
-                    </Card>
+                    </Form.Group>
                   </Col>
-                ))}
-              </Row>
+                  
+                  <Col>
+                    <Button variant="danger" onClick={clearRoute}>
+                      <FaTimes />
+                    </Button>
+                  </Col>
+                </Row>
+                <Row>DROP</Row>
+                <Row>
+                  <Col>
+                    <Form.Group controlId="formDestination">
+                      <Autocomplete
+                        onPlaceChanged={() => {
+                          const destination = destiantionRef.current.value;
+                          calculateRoute(destination);
+                        }}
+                      >
+                        <Form.Control
+                          type="text"
+                          placeholder="Destination"
+                          ref={destiantionRef}
+                          style={{ width: '200px' }}
+                        />
+                      </Autocomplete>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
-              <Row className="mt-3">
-                <Col>
-                  <div>Distance: {distance}</div>
-                  <div>Duration: {duration}</div>
-                </Col>
-              </Row>
-
-              <Button variant="success" className="mt-3 w-100" onClick={handleBooking}>
-                Book Now
-              </Button>
-            </Form>
-          </Card.Body>
-        </Card>
-      </div>
+                <Row className="mt-3">
+                  {['standard', 'bike', 'luxury'].map((type) => (
+                    <Col key={type} md={4} className="mb-2">
+                      <Card
+                        border={vehicleType === type ? 'primary' : 'light'}
+                        className="text-center"
+                        onClick={() => {
+                          setVehicleType(type);
+                          const rideCost = calculateCost(distance, type);
+                          setCost(rideCost);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <Card.Body>
+                          {type === 'standard' && <FaCar size={30} />}
+                          {type === 'bike' && <FaMotorcycle size={30} />}
+                          {type === 'luxury' && <FaTaxi size={30} />}
+                          <Card.Title>{type.charAt(0).toUpperCase() + type.slice(1)}</Card.Title>
+                          <Card.Text>Cost: LKR {calculateCost(distance, type)}</Card.Text>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+                <Row className="mt-3">
+                  <Col>
+                    <Button
+                      variant="primary"
+                      onClick={handleBooking}
+                      disabled={!directionsResponse}
+                    >
+                      Book Ride
+                    </Button>
+                  </Col>
+                </Row>
+                <Row className="mt-3">
+                  <Col>
+                    <h6>Distance: {distance}</h6>
+                    <h6>Duration: {duration}</h6>
+                    <h6>Cost: LKR {cost}</h6>
+                  </Col>
+                </Row>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col><Footer/>
+      </Row>
+      
     </Container>
   );
 }
