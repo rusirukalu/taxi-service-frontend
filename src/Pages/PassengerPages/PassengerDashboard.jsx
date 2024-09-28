@@ -147,9 +147,8 @@ function PassengerDashboard() {
   }
 
   return (
-
     <Container fluid className="p-0" style={{ height: '100vh' }}>
-      <NavBar/>
+      <NavBar />
       <Row style={{ height: '60%' }}>
         <GoogleMap
           center={currentLocation}
@@ -174,29 +173,29 @@ function PassengerDashboard() {
             <Card.Body>
               <Card.Title className="text-center">Book a Ride</Card.Title>
               <Form>
-                <Row>PICKUP</Row> 
-                <Row>
+                <Row className="mb-2">
                   <Col>
+                    <Form.Label>PICKUP</Form.Label>
                     <Form.Group controlId="formCurrentLocation">
                       <Form.Control
                         type="text"
                         placeholder="Current Location"
                         value={currentPlaceName}
                         readOnly
-                        style={{ cursor: 'not-allowed', width: '200px' }}
+                        style={{ cursor: 'not-allowed' }}
                       />
                     </Form.Group>
                   </Col>
-                  
-                  <Col>
+                  <Col xs="auto">
                     <Button variant="danger" onClick={clearRoute}>
                       <FaTimes />
                     </Button>
                   </Col>
                 </Row>
-                <Row>DROP</Row>
-                <Row>
+
+                <Row className="mb-2">
                   <Col>
+                    <Form.Label>DROP</Form.Label>
                     <Form.Group controlId="formDestination">
                       <Autocomplete
                         onPlaceChanged={() => {
@@ -208,7 +207,6 @@ function PassengerDashboard() {
                           type="text"
                           placeholder="Destination"
                           ref={destiantionRef}
-                          style={{ width: '200px' }}
                         />
                       </Autocomplete>
                     </Form.Group>
@@ -239,6 +237,7 @@ function PassengerDashboard() {
                     </Col>
                   ))}
                 </Row>
+
                 <Row className="mt-3">
                   <Col>
                     <Button
@@ -250,6 +249,7 @@ function PassengerDashboard() {
                     </Button>
                   </Col>
                 </Row>
+                
                 <Row className="mt-3">
                   <Col>
                     <h6>Distance: {distance}</h6>
@@ -260,9 +260,9 @@ function PassengerDashboard() {
               </Form>
             </Card.Body>
           </Card>
-        </Col><Footer/>
+        </Col>
+        <Footer />
       </Row>
-      
     </Container>
   );
 }
