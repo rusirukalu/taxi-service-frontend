@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import ImageComponent from '../Driver/ImageComponent';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const RegisterVehicle = ({ show, handleClose }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
@@ -8,32 +10,59 @@ const RegisterVehicle = ({ show, handleClose }) => {
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleColor, setVehicleColor] = useState('');
   const [vehicleOwner, setVehicleOwner] = useState('');
+  const [vehicleImageUrl, setVehicleImageUrl] = useState(''); // State to store image URL
+
+  // Handle image URL change
+  const handleImageUrlChange = (url) => {
+    setVehicleImageUrl(url);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/vehicles', {
+      const response = await axios.post('http://localhost:3000/api/v1/vehicle', {
         vehicleNumber,
         vehicleType,
         vehicleModel,
         vehicleColor,
         vehicleOwner,
+        vehicleImageUrl, // Add image URL to the payload
       });
       console.log('Vehicle registered:', response.data);
+       // SweetAlert success message
+       Swal.fire({
+        title: 'Success!',
+        text: 'Vehicle has been registered successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
       handleClose(); // Close the modal after successful registration
     } catch (error) {
       console.error('Error registering vehicle:', error);
+      // SweetAlert error message
+      Swal.fire({
+        title: 'Error!',
+        text: 'There was an error registering the vehicle.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     }
   };
 
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Register Vehicle</Modal.Title>
+        <Modal.Title>{vehicleNumber === '' ? 'Register Vehicle' : 'Update Vehicle'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
+          {/* Image Component */}
+          <Form.Group>
+            <Form.Label>Vehicle Image</Form.Label>
+            <ImageComponent onImageUrlChange={handleImageUrlChange} />
+          </Form.Group>
+
           <Form.Group controlId="formVehicleNumber">
             <Form.Label>Vehicle Number</Form.Label>
             <Form.Control
@@ -81,9 +110,7 @@ const RegisterVehicle = ({ show, handleClose }) => {
           </Form.Group>
           <br/>
           <Button variant="warning" type="submit">
-           {
-            vehicleNumber == "" ? " Register Vehicle" : "Update Vehicle"
-           }
+            {vehicleNumber === '' ? 'Register Vehicle' : 'Update Vehicle'}
           </Button>
         </Form>
       </Modal.Body>

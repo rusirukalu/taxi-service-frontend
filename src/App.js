@@ -12,7 +12,6 @@ import PassengerDashboard from './Pages/PassengerPages/PassengerDashboard';
 import CallOperatorLogin from './Pages/CallOperator/CallOperatorLogin';
 import RideBooking from './Pages/CallOperator/RideBooking';  
 import { createRoot } from 'react-dom/client';
-import theme from './theme';
 import CallOperatorDashboard from './Pages/CallOperator/CallOperatorDashboard';
 import AddPassenger from './Pages/CallOperator/AddPassenger';
 
@@ -27,7 +26,6 @@ root.render(
     <App />
   </React.StrictMode>
 );
-
 function App() {
   
   return (

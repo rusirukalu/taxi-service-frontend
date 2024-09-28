@@ -9,7 +9,7 @@ import EditProfileModal from '../../components/Driver/EditProfileModal';
 import MapComponent from '../../components/Driver/MapComponent';
 import RidesTable from '../../components/Driver/RidesTable';
 import RegisterVehicle from '../../components/Driver/RegisterVehicle ';
-
+import ChatComponent from '../../components/Driver/ChatComponent';
 import axios from 'axios';
 
 
@@ -25,6 +25,7 @@ export default function DriverDashboard() {
   const [editPhone, setEditPhone] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [totalRideCount, setTotalRideCount] = useState('');
+  const [totalEarnings, setTotalEarnings] = useState(0); // Add state for total earnings
   const navigate = useNavigate();
 
   //--------------fetch driver------------------//
@@ -64,6 +65,17 @@ export default function DriverDashboard() {
         }).catch(err => {
           console.log(err)
         })
+
+      // Fetch Total Earnings
+      axios.post('http://localhost:3000/api/v1/driver/total-earnings', {
+        driverId: userDetailsParse.id
+      })
+        .then(res => {
+          setTotalEarnings(res.data.message); // Set total earnings in state
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
   }, [navigate]);
 
@@ -117,6 +129,7 @@ export default function DriverDashboard() {
               textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
              }}>
               Driver's Dashboard
+              
             </h2>
           </Col>
 
@@ -136,9 +149,9 @@ export default function DriverDashboard() {
           <Col md={4}>
             <Card className="text-center">
               <Card.Body>
-                <Card.Title>Today's Earnings</Card.Title>
+                <Card.Title>Monthly Earnings</Card.Title>
                 <Card.Text>
-                  <h3>Rs. 1200.50</h3>
+                  <h3>Rs. {totalEarnings.toFixed(2)}</h3>
                 </Card.Text>
                 <Button variant="primary">View Details</Button>
               </Card.Body>
@@ -261,8 +274,9 @@ export default function DriverDashboard() {
 
         </Row>
       </Container>
-
+      <ChatComponent/>
       <Footer />
+      
     </div>
   );
 }
