@@ -1,0 +1,18 @@
+.add-passenger-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+  }
+  
+  .add-passenger-title {
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  .add-passenger-subtitle {
+    color: #666;
+  }
+  
+  .form-control {
+    margin-bottom: 20px;
+  }

@@ -3,7 +3,6 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar'; // Assuming you have a Navbar component
 import './CallOperatorDashboard.css'; // You can add custom styling here
-import AddPassenger from './AddPassenger';
 
 export default function CallOperatorDashboard() {
   const navigate = useNavigate();
