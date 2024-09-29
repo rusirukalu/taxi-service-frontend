@@ -312,7 +312,7 @@ export default function PassengerDashboard() {
                 >
                   <img
                     src={vehicle.imageUrl}
-                    alt={`${vehicleType} vehicle`}
+                    alt={'${vehicleType} vehicle'}
                     style={{ width: '50px', height: '50px', marginRight: '15px' }}
                   />
                   <div>
