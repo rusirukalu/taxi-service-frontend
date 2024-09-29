@@ -8,6 +8,7 @@ import DriverRegister from './Pages/DriverPages/DriverRegister';
 import DriverDashboard from './Pages/DriverPages/DriverDashboard';
 import PassengerLogin from './Pages/PassengerPages/PassengerLogin';
 import PassengerRegister from './Pages/PassengerPages/PassengerRegister';
+import Scheduleride from './Pages/PassengerPages/Scheduleride';
 import PassengerDashboard from './Pages/PassengerPages/PassengerDashboard';
 import CallOperatorLogin from './Pages/CallOperator/CallOperatorLogin';
 import RideBooking from './Pages/CallOperator/RideBooking';  
@@ -15,6 +16,7 @@ import { createRoot } from 'react-dom/client';
 import CallOperatorDashboard from './Pages/CallOperator/CallOperatorDashboard';
 import AddPassenger from './Pages/CallOperator/AddPassenger';
 import ManagePassengerDetails from './Pages/CallOperator/ManagePassengerDetails';
+
 
 // Get the root DOM element
 const rootElement = document.getElementById('root');
@@ -42,6 +44,7 @@ function App() {
         <Route path="/PassengerLogin" element={<PassengerLogin/>}></Route>
         <Route path="/PassengerRegister" element={<PassengerRegister/>}></Route>
         <Route path="/PassengerDashboard" element={<PassengerDashboard />}></Route>
+        <Route path="/Scheduleride" element={<Scheduleride />}></Route>
         <Route path="/CallOperatorLogin" element={<CallOperatorLogin />}></Route>
         <Route path="/RideBooking" element={<RideBooking />}></Route>
         <Route path="/CallOperatorDashboard" element={<CallOperatorDashboard />}></Route>

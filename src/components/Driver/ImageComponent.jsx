@@ -8,13 +8,11 @@ const ImageComponent = () => {
 
     console.log(imageUrls);
 
-    const handleImageUrlChange = (newImageUrl) => {
-        setImageUrl(newImageUrl);
-    }
+   
     return (
         <div>
             <div className="bg-primary bg-gradient w-75">
-                <ImageUploader onImageUrlChange={handleImageUrlChange} />
+                
             </div>
         </div>
     );

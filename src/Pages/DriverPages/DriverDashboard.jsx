@@ -16,6 +16,7 @@ import axios from 'axios';
 
 export default function DriverDashboard() {
   const [driver, setDriver] = useState({ fullName: '', email: '', username: '', nic: '', phone: '', address: '' });
+  const [vehicle, setVehicle] = useState({vehicleNumber: '', vehicleModel: ''});
   const [showModal, setShowModal] = useState(false);  // Modal visibility state
   const [showVehicleModal, setShowVehicleModal] = useState(false);
   const [editName, setEditName] = useState('');
@@ -76,6 +77,18 @@ export default function DriverDashboard() {
         .catch(err => {
           console.log(err);
         });
+
+
+      // Fetch vehicle details
+      axios.post('http://localhost:3000/api/v1/vehicle/details', {
+        driverId: userDetailsParse.id
+      })
+        .then(res => {
+          setVehicle(res.data.vehicle);  // Store vehicle details
+        })
+        .catch(err => {
+          console.log('Error fetching vehicle details:', err);
+        });
     }
   }, [navigate]);
 
@@ -125,15 +138,16 @@ export default function DriverDashboard() {
 
           {/*Driver Dashboard Title */}
           <Col md={4} className="d-flex justify-content-center">
-            <h2 style={{ color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center',
+            <h2 style={{
+              color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center',
               textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
-             }}>
+            }}>
               Driver's Dashboard
-              
+
             </h2>
           </Col>
 
-          
+
 
           {/*Logout Button */}
           <Col md={4} className="d-flex justify-content-center">
@@ -221,7 +235,7 @@ export default function DriverDashboard() {
             <Card className="mb-4">
               <Card.Header>Vehicle Details</Card.Header>
               <Card.Body className="text-center">
-                {/* Display Driver's Profile Image */}
+                {/* Display Vehicle Image */}
                 <Image
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHgVoBr3mBhjiroEm4lwp_j8nts8q661M-Pw&s"
                   roundedCircle
@@ -229,8 +243,8 @@ export default function DriverDashboard() {
                   style={{ width: '120px', height: '120px' }}
                   alt="Vehicle Details"
                 />
-                <p className="mt-3"><strong>Vehicle Number: </strong>{driver?.name || 'Loading...'}</p>
-                <p><strong>Vehicle Type: </strong>{driver?.name || 'Loading...'}</p>
+                <p className="mt-3"><strong>Vehicle Number: </strong>{vehicle.vehicleNumber || 'Loading...'}</p>
+                <p><strong>Vehicle Type: </strong>{vehicle.vehicleModel || 'Loading...'}</p>
                 <Button variant="success" onClick={handleShowVehicleModal}><strong>Update</strong></Button>
               </Card.Body>
             </Card>
@@ -274,9 +288,9 @@ export default function DriverDashboard() {
 
         </Row>
       </Container>
-      <ChatComponent/>
+      <ChatComponent />
       <Footer />
-      
+
     </div>
   );
 }
