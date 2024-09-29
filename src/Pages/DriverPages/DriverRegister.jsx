@@ -33,25 +33,26 @@ export default function DriverRegister() {
     try {
       const response = await axios.post('http://localhost:3000/api/v1/driver/register', formData); // Update with your backend route
       console.log(response.data);
-      
+
       // Display a success notification using SweetAlert 2
-    Swal.fire({
-      title: 'Success!',
-      text: 'Driver registered successfully!',
-      icon: 'success',
-      confirmButtonText: 'OK',
-    });
+      Swal.fire({
+        title: 'Success!',
+        text: 'Driver registered successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+      console.log(response.data);
 
     } catch (error) {
       console.error('There was an error registering the driver:', error);
-      
+
       // Display an error notification using SweetAlert 2
-    Swal.fire({
-      title: 'Error!',
-      text: 'Failed to register driver. Please try again.',
-      icon: 'error',
-      confirmButtonText: 'OK',
-    });
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to register driver. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     }
   };
 
@@ -67,7 +68,7 @@ export default function DriverRegister() {
               <Col md={10} lg={6} className="order-2 order-lg-1 d-flex flex-column align-items-center">
                 <h1 className="text-center fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</h1>
 
-                <Form onSubmit={handleSubmit}> 
+                <Form onSubmit={handleSubmit}>
                   <div className="d-flex flex-row align-items-center mb-4 w-100">
                     <FaEnvelope size={24} className="me-3" />
                     <Form.Control type="email"
@@ -152,7 +153,7 @@ export default function DriverRegister() {
                   </div>
 
 
-                  
+
                 </Form>
                 <Button variant="warning" size="lg" type="submit" className="mb-4">Register</Button>
               </Col>
@@ -163,12 +164,12 @@ export default function DriverRegister() {
             </Row>
           </Card.Body>
         </Card>
-        
+
       </Container>
 
 
-      <Footer/>
-      
+      <Footer />
+
     </div>
   )
 }
