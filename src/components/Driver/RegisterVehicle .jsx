@@ -1,43 +1,47 @@
 import React, { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
-import ImageComponent from '../Driver/ImageComponent';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import ImageUploader from '../../utils/ImageUploader'
 
 const RegisterVehicle = ({ show, handleClose }) => {
   const [vehicleNumber, setVehicleNumber] = useState('');
-  const [vehicleType, setVehicleType] = useState('standard'); // Default vehicle type
+  const [vehicleType, setVehicleType] = useState('car'); // Default vehicle type
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleColor, setVehicleColor] = useState('');
   const [vehicleOwner, setVehicleOwner] = useState('me'); // Default vehicle owner
+  const [vehicleCapacity, setVehicleCapacity] = useState(0);
   const [vehicleImageUrl, setVehicleImageUrl] = useState(''); // State to store image URL
 
   // Handle image URL change
-  const handleImageUrlChange = (url) => {
-    setVehicleImageUrl(url);
-  };
+  const handleImageUrlChange = (newImageUrl) => {
+    setVehicleImageUrl(newImageUrl);
+}
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/vehicle', {
+      const response = await axios.post('http://localhost:3000/api/v1/vehicle/create-vehicle', {
         vehicleNumber,
         vehicleType,
         vehicleModel,
         vehicleColor,
         vehicleOwner,
-        vehicleImageUrl, // Add image URL to the payload
+        vehicleCapacity: parseInt(vehicleCapacity),
+        images: vehicleImageUrl,
       });
       console.log('Vehicle registered:', response.data);
-       // SweetAlert success message
-       Swal.fire({
+      // SweetAlert success message
+      Swal.fire({
         title: 'Success!',
         text: 'Vehicle has been registered successfully.',
         icon: 'success',
         confirmButtonText: 'OK',
       });
-      handleClose(); // Close the modal after successful registration
+      // Close the modal after successful registration
+      handleClose();
+
     } catch (error) {
       console.error('Error registering vehicle:', error);
       // SweetAlert error message
@@ -53,14 +57,14 @@ const RegisterVehicle = ({ show, handleClose }) => {
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{vehicleNumber === '' ? 'Register Vehicle' : 'Update Vehicle'}</Modal.Title>
+        <Modal.Title>Register Vehicle</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
           {/* Image Component */}
           <Form.Group>
             <Form.Label>Vehicle Image</Form.Label>
-            <ImageComponent onImageUrlChange={handleImageUrlChange} />
+            <ImageUploader onImageUrlChange={handleImageUrlChange} />
           </Form.Group>
 
           <Form.Group controlId="formVehicleNumber">
@@ -72,19 +76,19 @@ const RegisterVehicle = ({ show, handleClose }) => {
               required
             />
           </Form.Group>
-          
+
           {/* Vehicle Type Dropdown */}
           <Form.Group controlId="formVehicleType">
             <Form.Label>Vehicle Type</Form.Label>
             <Form.Control
-              as="select" // Change to dropdown
+              as="select"
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
               required
             >
-              <option value="standard">Standard</option>
+              <option value="car">Car</option>
               <option value="bike">Bike</option>
-              <option value="luxury">Luxury</option>
+              <option value="tuk">Tuk</option>
             </Form.Control>
           </Form.Group>
 
@@ -97,6 +101,7 @@ const RegisterVehicle = ({ show, handleClose }) => {
               required
             />
           </Form.Group>
+
           <Form.Group controlId="formVehicleColor">
             <Form.Label>Vehicle Color</Form.Label>
             <Form.Control
@@ -106,12 +111,23 @@ const RegisterVehicle = ({ show, handleClose }) => {
               required
             />
           </Form.Group>
-          
-           {/* Vehicle Owner Dropdown */}
-           <Form.Group controlId="formVehicleOwner">
+
+          {/* Seating Capacity */}
+          <Form.Group controlId="formVehicleCapacity">
+            <Form.Label>Seating Capacity</Form.Label>
+            <Form.Control
+              type="number"
+              value={vehicleCapacity}
+              onChange={(e) => setVehicleCapacity(e.target.value)} // Ensure it's a number
+              required
+            />
+          </Form.Group>
+
+          {/* Vehicle Owner Dropdown */}
+          <Form.Group controlId="formVehicleOwner">
             <Form.Label>Vehicle Owner</Form.Label>
             <Form.Control
-              as="select" // Change to dropdown
+              as="select"
               value={vehicleOwner}
               onChange={(e) => setVehicleOwner(e.target.value)}
               required
@@ -121,9 +137,9 @@ const RegisterVehicle = ({ show, handleClose }) => {
             </Form.Control>
           </Form.Group>
 
-          <br/>
+          <br />
           <Button variant="warning" type="submit">
-            {vehicleNumber === '' ? 'Register Vehicle' : 'Update Vehicle'}
+            Register
           </Button>
         </Form>
       </Modal.Body>
