@@ -6,16 +6,31 @@ import {
   DirectionsRenderer,
   useJsApiLoader,
 } from '@react-google-maps/api';
-import { Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
+import { Button, Form, Container, Row, Col, Card, Modal, ListGroup } from 'react-bootstrap';
 import { FaTimes, FaMotorcycle, FaCar, FaTaxi } from 'react-icons/fa';
-import axios from 'axios';  // Import Axios for API requests
+import axios from 'axios';
 import '../../Styles/PassengerDashboard.css';
 import NavBar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
 const center = { lat: 6.927079, lng: 79.861244 };
 
-function PassengerDashboard() {
+const availableVehicles = {
+  Tuk: [
+    { id: 1, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'John Doe', no: 'TUK001' },
+    { id: 2, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Jane Smith', no: 'TUK002' },
+  ],
+  Bike: [
+    { id: 3, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Mike Johnson', no: 'BIKE001' },
+    { id: 4, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Sarah Brown', no: 'BIKE002' },
+  ],
+  Car: [
+    { id: 5, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Tom Wilson', no: 'CAR001' },
+    { id: 6, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Emily Davis', no: 'CAR002' },
+  ],
+};
+
+export default function PassengerDashboard() {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: 'Api-key',
     libraries: ['places'],
@@ -28,8 +43,10 @@ function PassengerDashboard() {
   const [cost, setCost] = useState(0);
   const [currentLocation, setCurrentLocation] = useState(center);
   const [currentPlaceName, setCurrentPlaceName] = useState('');
-  const [vehicleType, setVehicleType] = useState('standard');
-  const destiantionRef = useRef();
+  const [vehicleType, setVehicleType] = useState('Tuk');
+  const [showModal, setShowModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const destinationRef = useRef();
 
   useEffect(() => {
     if (navigator.geolocation && isLoaded) {
@@ -63,15 +80,15 @@ function PassengerDashboard() {
 
   function calculateCost(distance, vehicleType) {
     const rates = {
-      standard: { costPerKilometer: 350, costPerMinute: 350 },
-      bike: { costPerKilometer: 200, costPerMinute: 200 },
-      luxury: { costPerKilometer: 750, costPerMinute: 750 },
+      Tuk: { costPerKilometer: 100, costPerMinute: 100 },
+      Bike: { costPerKilometer: 70, costPerMinute: 70 },
+      Car: { costPerKilometer: 200, costPerMinute: 200 },
     };
 
     const distanceValue = parseFloat(distance.replace(/ km/, '').replace(',', '.'));
     const durationValue = parseFloat(duration.replace(/ mins/, '').replace(',', '.'));
 
-    const selectedRate = rates[vehicleType] || rates.standard;
+    const selectedRate = rates[vehicleType];
 
     const totalCost = (selectedRate.costPerKilometer * distanceValue) + (selectedRate.costPerMinute * durationValue);
     return isNaN(totalCost) ? 0 : totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -113,8 +130,8 @@ function PassengerDashboard() {
     setDistance('');
     setDuration('');
     setCost(0);
-    if (destiantionRef.current) {
-      destiantionRef.current.value = '';
+    if (destinationRef.current) {
+      destinationRef.current.value = '';
     }
     if (map) {
       map.panTo(currentLocation);
@@ -123,20 +140,27 @@ function PassengerDashboard() {
   }
 
   async function handleBooking() {
+    if (!selectedVehicle) {
+      alert('Please select a vehicle before booking.');
+      return;
+    }
+
     const bookingData = {
       currentLocation,
       currentPlaceName,
-      destination: destiantionRef.current.value,
+      destination: destinationRef.current.value,
       distance,
       duration,
       cost,
       vehicleType,
+      selectedVehicle,
     };
 
     try {
       const response = await axios.post('/api/book-ride', bookingData);
       if (response.status === 200) {
         alert('Ride booked successfully!');
+        setShowModal(false);
       } else {
         alert('Failed to book the ride.');
       }
@@ -146,125 +170,170 @@ function PassengerDashboard() {
     }
   }
 
+  function confirmVehicleSelection() {
+    if (selectedVehicle) {
+      setVehicleType(vehicleType);
+      const rideCost = calculateCost(distance, vehicleType);
+      setCost(rideCost);
+      setShowModal(false);
+    }
+  }
+
   return (
+    <div className="d-flex flex-column min-vh-100">
+      <NavBar />
+      <Container fluid className="flex-grow-1 p-0">
+        <Row style={{ height: '60vh' }}>
+          <GoogleMap
+            center={currentLocation}
+            zoom={15}
+            mapContainerStyle={{ width: '100%', height: '100%' }}
+            options={{
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: false,
+            }}
+            onLoad={(map) => setMap(map)}
+          >
+            <Marker position={currentLocation} />
+            {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
+          </GoogleMap>
+        </Row>
 
-    <Container fluid className="p-0" style={{ height: '100vh' }}>
-      <NavBar/>
-      <Row style={{ height: '60%' }}>
-        <GoogleMap
-          center={currentLocation}
-          zoom={15}
-          mapContainerStyle={{ width: '100%', height: '100%' }}
-          options={{
-            zoomControl: true,
-            streetViewControl: false,
-            mapTypeControl: false,
-            fullscreenControl: false,
-          }}
-          onLoad={(map) => setMap(map)}
-        >
-          <Marker position={currentLocation} />
-          {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
-        </GoogleMap>
-      </Row>
-
-      <Row className="justify-content-center align-items-center" style={{ padding: '20px', height: '40%' }}>
-        <Col md={6}>
-          <Card>
-            <Card.Body>
-              <Card.Title className="text-center">Book a Ride</Card.Title>
-              <Form>
-                <Row>PICKUP</Row> 
-                <Row>
-                  <Col>
-                    <Form.Group controlId="formCurrentLocation">
-                      <Form.Control
-                        type="text"
-                        placeholder="Current Location"
-                        value={currentPlaceName}
-                        readOnly
-                        style={{ cursor: 'not-allowed', width: '200px' }}
-                      />
-                    </Form.Group>
-                  </Col>
-                  
-                  <Col>
-                    <Button variant="danger" onClick={clearRoute}>
-                      <FaTimes />
-                    </Button>
-                  </Col>
-                </Row>
-                <Row>DROP</Row>
-                <Row>
-                  <Col>
-                    <Form.Group controlId="formDestination">
-                      <Autocomplete
-                        onPlaceChanged={() => {
-                          const destination = destiantionRef.current.value;
-                          calculateRoute(destination);
-                        }}
-                      >
+        <Row className="justify-content-center align-items-center py-4">
+          <Col md={6}>
+            <Card>
+              <Card.Body>
+                <Card.Title className="text-center">Book a Ride</Card.Title>
+                <Form>
+                  <Row className="mb-2">
+                    <Col>
+                      <Form.Label>PICKUP</Form.Label>
+                      <Form.Group controlId="formCurrentLocation">
                         <Form.Control
                           type="text"
-                          placeholder="Destination"
-                          ref={destiantionRef}
-                          style={{ width: '200px' }}
+                          placeholder="Current Location"
+                          value={currentPlaceName}
+                          readOnly
+                          style={{ cursor: 'not-allowed' }}
                         />
-                      </Autocomplete>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row className="mt-3">
-                  {['standard', 'bike', 'luxury'].map((type) => (
-                    <Col key={type} md={4} className="mb-2">
-                      <Card
-                        border={vehicleType === type ? 'primary' : 'light'}
-                        className="text-center"
-                        onClick={() => {
-                          setVehicleType(type);
-                          const rideCost = calculateCost(distance, type);
-                          setCost(rideCost);
-                        }}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <Card.Body>
-                          {type === 'standard' && <FaCar size={30} />}
-                          {type === 'bike' && <FaMotorcycle size={30} />}
-                          {type === 'luxury' && <FaTaxi size={30} />}
-                          <Card.Title>{type.charAt(0).toUpperCase() + type.slice(1)}</Card.Title>
-                          <Card.Text>Cost: LKR {calculateCost(distance, type)}</Card.Text>
-                        </Card.Body>
-                      </Card>
+                      </Form.Group>
                     </Col>
-                  ))}
-                </Row>
-                <Row className="mt-3">
-                  <Col>
-                    <Button
-                      variant="primary"
-                      onClick={handleBooking}
-                      disabled={!directionsResponse}
-                    >
-                      Book Ride
-                    </Button>
-                  </Col>
-                </Row>
-                <Row className="mt-3">
-                  <Col>
-                    <h6>Distance: {distance}</h6>
-                    <h6>Duration: {duration}</h6>
-                    <h6>Cost: LKR {cost}</h6>
-                  </Col>
-                </Row>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col><Footer/>
-      </Row>
-      
-    </Container>
+                    <Col xs="auto">
+                      <Button variant="danger" onClick={clearRoute}>
+                        <FaTimes />
+                      </Button>
+                    </Col>
+                  </Row>
+
+                  <Row className="mb-2">
+                    <Col>
+                      <Form.Label>DROP</Form.Label>
+                      <Form.Group controlId="formDestination">
+                        <Autocomplete
+                          onPlaceChanged={() => {
+                            const destination = destinationRef.current.value;
+                            calculateRoute(destination);
+                          }}
+                        >
+                          <Form.Control
+                            type="text"
+                            placeholder="Destination"
+                            ref={destinationRef}
+                          />
+                        </Autocomplete>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Row className="mt-3">
+                    {['Tuk', 'Bike', 'Car'].map((type) => (
+                      <Col key={type} md={4} className="mb-2">
+                        <Card
+                          border={vehicleType === type ? 'primary' : 'light'}
+                          className="text-center"
+                          onClick={() => {
+                            setVehicleType(type);
+                            setShowModal(true);
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <Card.Body>
+                            {type === 'Tuk' && <FaTaxi size={30} />}
+                            {type === 'Bike' && <FaMotorcycle size={30} />}
+                            {type === 'Car' && <FaCar size={30} />}
+                            <Card.Title>{type}</Card.Title>
+                            <Card.Text>Cost: LKR {calculateCost(distance, type)}</Card.Text>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+
+                  <Row className="mt-3">
+                    <Col>
+                      <Button
+                        variant="primary"
+                        onClick={handleBooking}
+                        disabled={!directionsResponse || !selectedVehicle}
+                      >
+                        Book Ride
+                      </Button>
+                    </Col>
+                  </Row>
+
+                  <Row className="mt-3">
+                    <Col>
+                      <h6>Distance: {distance}</h6>
+                      <h6>Duration: {duration}</h6>
+                      <h6>Cost: LKR {cost}</h6>
+                    </Col>
+                  </Row>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+          <Modal.Header closeButton>
+            <Modal.Title>Available {vehicleType}s</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ListGroup>
+              {availableVehicles[vehicleType].map((vehicle) => (
+                <ListGroup.Item
+                  key={vehicle.id}
+                  action
+                  onClick={() => setSelectedVehicle(vehicle)}
+                  active={selectedVehicle && selectedVehicle.id === vehicle.id}
+                  className="d-flex align-items-center"
+                >
+                  <img
+                    src={vehicle.imageUrl}
+                    alt={'${vehicleType} vehicle'}
+                    style={{ width: '50px', height: '50px', marginRight: '15px' }}
+                  />
+                  <div>
+                    <h5>{vehicleType}</h5>
+                    <p className="mb-0">Vehicle No: {vehicle.no}</p>
+                  </div>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={confirmVehicleSelection} disabled={!selectedVehicle}>
+              Confirm Selection
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </Container>
+      <Footer />
+    </div>
   );
 }
-
-export default PassengerDashboard;
