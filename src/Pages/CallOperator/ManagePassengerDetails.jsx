@@ -12,7 +12,7 @@ const ManagePassengerDetails = () => {
       
       const data = [
         { id: 1, email: 'oshadan@icloud.com', fullName: 'Oshada Wickramasinghe', userName: 'oshada_n', nic: '2001278436782', phone: '123-456-7890', address: '24, Richmond Hill, Galle' },
-        { id: 2, email: 'mithilad@outlook.com', fullName: 'Mithila Damruwan', userName: 'mithila_d', nic: '123-456-7890', phone: '123 Main St', address: '17, Elliot Rd, Galle' },
+        { id: 2, email: 'mithilad@outlook.com', fullName: 'Mithila Damruwan', userName: 'mithila_d', nic: '29908283789239', phone: '897-237-675', address: '17, Elliot Rd, Galle' },
       ];
 
       setPassengers(data);
