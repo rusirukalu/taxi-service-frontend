@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Modal } from 'react-bootstrap';
-import { FaArrowLeft, FaStar } from "react-icons/fa";
+import { FaArrowLeft, FaStar, FaCreditCard, FaLock } from "react-icons/fa";
 import { BsInfoCircle } from "react-icons/bs";
 import { MdCheckCircle } from "react-icons/md";
 import {
@@ -21,11 +21,20 @@ export default function Scheduleride({ bookingDetails = {} }) {
   const [pickupDate, setPickupDate] = useState(bookingDetails.pickupDate || '');
   const [pickupLocation, setPickupLocation] = useState(bookingDetails.pickupLocation || '');
   const [dropLocation, setDropLocation] = useState(bookingDetails.dropLocation || '');
-  const [rideStatus, setRideStatus] = useState(bookingDetails.status || '');
+  const [rideStatus, setRideStatus] = useState('Pending');
   const [confirmationMessage, setConfirmationMessage] = useState('');
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [cardDetails, setCardDetails] = useState({
+    cardType: 'visa',
+    cardNumber: '',
+    expirationMonth: '',
+    expirationYear: '',
+    cvv: ''
+  });
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: 'Your-API-Key',
@@ -35,7 +44,7 @@ export default function Scheduleride({ bookingDetails = {} }) {
   useEffect(() => {
     if (bookingDetails) {
       setConfirmationMessage(
-        `Your booking for ${bookingDetails.pickupDate || ''} at ${bookingDetails.pickupTime || ''} has been ${bookingDetails.status || ''}. Your driver will be assigned 15 to 30 minutes before the specified time, and trip details will be shared then. The trip fare may change depending on availability.`
+        `Your booking for ${bookingDetails.pickupDate || ''} at ${bookingDetails.pickupTime || ''} is pending. Your driver will be assigned 15 to 30 minutes before the specified time, and trip details will be shared then. The trip fare may change depending on availability.`
       );
     }
   }, [bookingDetails]);
@@ -59,7 +68,16 @@ export default function Scheduleride({ bookingDetails = {} }) {
   };
 
   const handleDoneClick = () => {
-    setShowRatingModal(true);
+    if (rideStatus === 'Completed') {
+      setShowRatingModal(true);
+    } else {
+      Swal.fire({
+        title: 'Ride not completed',
+        text: 'You can only rate the ride after it has been completed.',
+        icon: 'info',
+        confirmButtonText: 'OK'
+      });
+    }
   };
 
   const handleCloseRatingModal = () => {
@@ -86,11 +104,47 @@ export default function Scheduleride({ bookingDetails = {} }) {
       if (result.isConfirmed) {
         setShowRatingModal(false);
         setRating(0);
-        // Here you would typically send the rating to your backend
         console.log(`Submitted rating: ${rating}`);
-        // Navigate to Home.jsx
         navigate('/Home');
       }
+    });
+  };
+
+  const handlePayClick = () => {
+    setShowPaymentModal(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+    setPaymentMethod('');
+    setCardDetails({
+      cardType: 'visa',
+      cardNumber: '',
+      expirationMonth: '',
+      expirationYear: '',
+      cvv: ''
+    });
+  };
+
+  const handlePaymentMethodSelect = (method) => {
+    setPaymentMethod(method);
+    if (method === 'cash') {
+      handleClosePaymentModal();
+      setRideStatus('Completed');
+    }
+  };
+
+  const handleCardPayment = () => {
+    // Here you would typically process the card payment
+    console.log('Processing card payment:', cardDetails);
+    handleClosePaymentModal();
+    setRideStatus('Completed');
+  };
+
+  const handleCardDetailsChange = (e) => {
+    setCardDetails({
+      ...cardDetails,
+      [e.target.name]: e.target.value
     });
   };
 
@@ -128,10 +182,10 @@ export default function Scheduleride({ bookingDetails = {} }) {
         <Card.Body>
           <Row className="align-items-center mb-3">
             <Col xs="auto">
-              <MdCheckCircle color={rideStatus === 'Confirmed' ? "#4CAF50" : "red"} size={24} />
+              <MdCheckCircle color={rideStatus === 'Pending' ? "#FFA500" : rideStatus === 'Completed' ? "#4CAF50" : "red"} size={24} />
             </Col>
             <Col>
-              <h5 className="mb-0">Scheduled Ride {rideStatus}</h5>
+              <h5 className="mb-0">Scheduled Ride: {rideStatus}</h5>
             </Col>
           </Row>
 
@@ -182,13 +236,35 @@ export default function Scheduleride({ bookingDetails = {} }) {
             </Col>
           </Row>
 
+          <div className="mb-4">
+            <Form.Group controlId="status">
+              <Form.Label className="text-gray-500">STATUS</Form.Label>
+              <Form.Control
+                type="text"
+                value={rideStatus}
+                readOnly
+                className="bg-gray-100"
+              />
+            </Form.Group>
+          </div>
+
           <Card className="bg-light border-0 mb-3">
             <Card.Body>
               {confirmationMessage}
             </Card.Body>
           </Card>
 
-          <Button variant="primary" className="w-100" onClick={handleDoneClick}>Done</Button>
+          {rideStatus !== 'Completed' && (
+            <Button variant="primary" className="w-100 mb-2" onClick={handlePayClick}>Pay</Button>
+          )}
+          <Button 
+            variant="success" 
+            className="w-100" 
+            onClick={handleDoneClick}
+            disabled={rideStatus !== 'Completed'}
+          >
+            Done
+          </Button>
         </Card.Body>
       </Card>
 
@@ -226,6 +302,119 @@ export default function Scheduleride({ bookingDetails = {} }) {
             Submit Rating
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      <Modal show={showPaymentModal} onHide={handleClosePaymentModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Payment Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {!paymentMethod ? (
+            <div>
+              <Button variant="primary" className="w-100 mb-2" onClick={() => handlePaymentMethodSelect('cash')}>Cash</Button>
+              <Button variant="secondary" className="w-100" onClick={() => handlePaymentMethodSelect('card')}>Card</Button>
+            </div>
+          ) : paymentMethod === 'card' && (
+            <Form>
+              <Form.Group className="mb-3" controlId="cardType">
+                <Form.Label>Card Type *</Form.Label>
+                <div>
+                  <Form.Check
+                    inline
+                    type="radio"
+                    id="visa"
+                    name="cardType"
+                    value="visa"
+                    label={<><FaCreditCard /> Visa</>}
+                    checked={cardDetails.cardType === 'visa'}
+                    onChange={handleCardDetailsChange}
+                  />
+                  <Form.Check
+                    inline
+                    type="radio"
+                    id="mastercard"
+                    name="cardType"
+                    value="mastercard"
+                    label={<><FaCreditCard /> Mastercard</>}
+                    checked={cardDetails.cardType === 'mastercard'}
+                    onChange={handleCardDetailsChange}
+                  />
+                </div>
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="cardNumber">
+                <Form.Label>Card Number *</Form.Label>
+                <Form.Control 
+                  type="text" 
+                  name="cardNumber"
+                  placeholder="Enter card number" 
+                  value={cardDetails.cardNumber}
+                  onChange={handleCardDetailsChange}
+                  required
+                />
+                <Form.Text className="text-danger">
+                  {cardDetails.cardNumber ? '' : ''}
+                </Form.Text>
+              </Form.Group>
+              <Row className="mb-3">
+                <Col>
+                  <Form.Group controlId="expirationMonth">
+                    <Form.Label>Expiration Month *</Form.Label>
+                    <Form.Select 
+                      name="expirationMonth"
+                      value={cardDetails.expirationMonth}
+                      onChange={handleCardDetailsChange}
+                      required
+                    >
+                      <option value="">Month</option>
+                      {[...Array(12)].map((_, i) => (
+                        <option key={i} value={i + 1}>{`${i + 1}`.padStart(2, '0')}</option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group controlId="expirationYear">
+                    <Form.Label>Expiration Year *</Form.Label>
+                    <Form.Select
+                      name="expirationYear"
+                      value={cardDetails.expirationYear}
+                      onChange={handleCardDetailsChange}
+                      required
+                    >
+                      <option value="">Year</option>
+                      {[...Array(10)].map((_, i) => {
+                        const year = new Date().getFullYear() + i;
+                        return <option key={year} value={year}>{year}</option>;
+                      })}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Form.Group className="mb-3" controlId="cvv">
+                <Form.Label>CVV *</Form.Label>
+                <Form.Control 
+                  type="text" 
+                  name="cvv"
+                  placeholder="CVV" 
+                  value={cardDetails.cvv}
+                  onChange={handleCardDetailsChange}
+                  required
+                />
+                <Form.Text className="text-muted">
+                  This code is a three or four digit number printed on the back or front of credit cards.
+                </Form.Text>
+              </Form.Group>
+              <div className="d-flex justify-content-between">
+                <Button variant="secondary" onClick={handleClosePaymentModal}>
+                  Cancel
+                </Button>
+                <Button variant="primary" onClick={handleCardPayment}>
+                  Pay
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Modal.Body>
       </Modal>
     </Container>
   );

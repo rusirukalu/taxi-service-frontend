@@ -10,9 +10,7 @@ const container = document.getElementById('root');
 const root = createRoot(container); // createRoot is used in React 18
 
 root.render(
-  <React.StrictMode>
     <App />
-  </React.StrictMode>
 );
 
 
