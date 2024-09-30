@@ -177,7 +177,10 @@ export default function DriverDashboard() {
         {/* Summary Cards */}
         <Row className="mb-4">
           <Col md={4}>
-            <Card className="text-center">
+            <Card className="text-center"
+            style={{
+              background: 'linear-gradient(125deg, #ecf0f1, #FFA500,  #ecf0f1)', 
+            }}>
               <Card.Body>
                 <Card.Title>Monthly Earnings</Card.Title>
                 <Card.Text>
@@ -189,7 +192,10 @@ export default function DriverDashboard() {
           </Col>
 
           <Col md={4}>
-            <Card className="text-center">
+            <Card className="text-center"
+            style={{
+              background: 'linear-gradient(125deg, #ecf0f1, #FFA500,  #ecf0f1)', 
+            }}>
               <Card.Body>
                 <Card.Title>Total Rides</Card.Title>
                 <Card.Text>
@@ -203,7 +209,10 @@ export default function DriverDashboard() {
           </Col>
 
           <Col md={4}>
-            <Card className="text-center">
+            <Card className="text-center"
+            style={{
+              background: 'linear-gradient(125deg, #ecf0f1, #FFA500,  #ecf0f1)', 
+            }}>
               <Card.Body>
                 <Card.Title>Rating</Card.Title>
                 <Card.Text>

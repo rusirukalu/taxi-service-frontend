@@ -65,11 +65,11 @@ function RideBooking() {
     console.log('Destination:', destinationRef.current.value);
   
     try {
-      const directionsService = new google.maps.DirectionsService();
+      const directionsService = new window.google.maps.DirectionsService();
       const results = await directionsService.route({
         origin: originRef.current.value,
         destination: destinationRef.current.value,
-        travelMode: google.maps.TravelMode.DRIVING,
+        travelMode: window.google.maps.TravelMode.DRIVING,
       });
       setDirectionsResponse(results);
   
