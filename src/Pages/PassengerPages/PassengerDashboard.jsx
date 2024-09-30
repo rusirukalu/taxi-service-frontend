@@ -1,11 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import {
-  GoogleMap,
-  Marker,
-  Autocomplete,
-  DirectionsRenderer,
-  useJsApiLoader,
-} from '@react-google-maps/api';
+import { GoogleMap, Marker, Autocomplete, DirectionsRenderer, useJsApiLoader } from '@react-google-maps/api';
 import { Button, Form, Container, Row, Col, Card, Modal, ListGroup } from 'react-bootstrap';
 import { FaTimes, FaMotorcycle, FaCar, FaTaxi } from 'react-icons/fa';
 import axios from 'axios';
@@ -14,21 +8,6 @@ import NavBar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
 const center = { lat: 6.927079, lng: 79.861244 };
-
-const availableVehicles = {
-  Tuk: [
-    { id: 1, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'John Doe', no: 'TUK001' },
-    { id: 2, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Jane Smith', no: 'TUK002' },
-  ],
-  Bike: [
-    { id: 3, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Mike Johnson', no: 'BIKE001' },
-    { id: 4, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Sarah Brown', no: 'BIKE002' },
-  ],
-  Car: [
-    { id: 5, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Tom Wilson', no: 'CAR001' },
-    { id: 6, imageUrl: '/placeholder.svg?height=100&width=100', driverName: 'Emily Davis', no: 'CAR002' },
-  ],
-};
 
 export default function PassengerDashboard() {
   const { isLoaded } = useJsApiLoader({
@@ -44,6 +23,7 @@ export default function PassengerDashboard() {
   const [currentLocation, setCurrentLocation] = useState(center);
   const [currentPlaceName, setCurrentPlaceName] = useState('');
   const [vehicleType, setVehicleType] = useState('Tuk');
+  const [availableVehicles, setAvailableVehicles] = useState({ Tuk: [], Bike: [], Car: [] });
   const [showModal, setShowModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const destinationRef = useRef();
@@ -62,8 +42,6 @@ export default function PassengerDashboard() {
               if (results[0]) {
                 setCurrentPlaceName(results[0].formatted_address);
               }
-            } else {
-              console.log('Geocoder failed due to: ' + status);
             }
           });
         },
@@ -73,9 +51,36 @@ export default function PassengerDashboard() {
       );
     }
   }, [isLoaded]);
+  
+  useEffect(() => {
+    // Fetch available vehicles by type from API
+    async function fetchVehicles() {
+      try {
+        const response = await axios.post('http://localhost:3000/api/v1/vehicle/get-all-vehicle-types'); // Adjust API endpoint
+        setAvailableVehicles(response.data.message);
+        console.log(response.data.message);
+      } catch (error) {
+        console.error('Error fetching rides:', error);
+      }
+    }
+  
+    // Call the fetchVehicles function
+    fetchVehicles();
+  }, [vehicleType]); // Effect will run when vehicleType changes
+  
 
-  if (!isLoaded) {
-    return <div>Loading...</div>;
+  function clearRoute() {
+    setDirectionsResponse(null);
+    setDistance('');
+    setDuration('');
+    setCost(0);
+    if (destinationRef.current) {
+      destinationRef.current.value = '';
+    }
+    if (map) {
+      map.panTo(currentLocation);
+      map.setZoom(15);
+    }
   }
 
   function calculateCost(distance, vehicleType) {
@@ -89,15 +94,12 @@ export default function PassengerDashboard() {
     const durationValue = parseFloat(duration.replace(/ mins/, '').replace(',', '.'));
 
     const selectedRate = rates[vehicleType];
-
-    const totalCost = (selectedRate.costPerKilometer * distanceValue) + (selectedRate.costPerMinute * durationValue);
+    const totalCost = selectedRate.costPerKilometer * distanceValue + selectedRate.costPerMinute * durationValue;
     return isNaN(totalCost) ? 0 : totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   async function calculateRoute(destination) {
-    if (!destination) {
-      return;
-    }
+    if (!destination) return;
 
     setDirectionsResponse(null);
     setDistance('');
@@ -115,68 +117,14 @@ export default function PassengerDashboard() {
       setDirectionsResponse(results);
       const distance = results.routes[0].legs[0].distance.text;
       const duration = results.routes[0].legs[0].duration.text;
-
-      const rideCost = calculateCost(distance, vehicleType);
-      setCost(rideCost);
+      setCost(calculateCost(distance, vehicleType));
       setDistance(distance);
       setDuration(duration);
-    } else {
-      console.error('No route found');
-    }
-  }
-
-  function clearRoute() {
-    setDirectionsResponse(null);
-    setDistance('');
-    setDuration('');
-    setCost(0);
-    if (destinationRef.current) {
-      destinationRef.current.value = '';
-    }
-    if (map) {
-      map.panTo(currentLocation);
-      map.setZoom(15);
-    }
-  }
-
-  async function handleBooking() {
-    if (!selectedVehicle) {
-      alert('Please select a vehicle before booking.');
-      return;
-    }
-
-    const bookingData = {
-      currentLocation,
-      currentPlaceName,
-      destination: destinationRef.current.value,
-      distance,
-      duration,
-      cost,
-      vehicleType,
-      selectedVehicle,
-    };
-
-    try {
-      const response = await axios.post('/api/book-ride', bookingData);
-      if (response.status === 200) {
-        alert('Ride booked successfully!');
-        setShowModal(false);
-      } else {
-        alert('Failed to book the ride.');
-      }
-    } catch (error) {
-      console.error('Error booking ride:', error);
-      alert('Error booking ride.');
     }
   }
 
   function confirmVehicleSelection() {
-    if (selectedVehicle) {
-      setVehicleType(vehicleType);
-      const rideCost = calculateCost(distance, vehicleType);
-      setCost(rideCost);
-      setShowModal(false);
-    }
+    setShowModal(false);
   }
 
   return (
@@ -188,12 +136,6 @@ export default function PassengerDashboard() {
             center={currentLocation}
             zoom={15}
             mapContainerStyle={{ width: '100%', height: '100%' }}
-            options={{
-              zoomControl: true,
-              streetViewControl: false,
-              mapTypeControl: false,
-              fullscreenControl: false,
-            }}
             onLoad={(map) => setMap(map)}
           >
             <Marker position={currentLocation} />
@@ -211,13 +153,7 @@ export default function PassengerDashboard() {
                     <Col>
                       <Form.Label>PICKUP</Form.Label>
                       <Form.Group controlId="formCurrentLocation">
-                        <Form.Control
-                          type="text"
-                          placeholder="Current Location"
-                          value={currentPlaceName}
-                          readOnly
-                          style={{ cursor: 'not-allowed' }}
-                        />
+                        <Form.Control type="text" value={currentPlaceName} readOnly />
                       </Form.Group>
                     </Col>
                     <Col xs="auto">
@@ -237,11 +173,7 @@ export default function PassengerDashboard() {
                             calculateRoute(destination);
                           }}
                         >
-                          <Form.Control
-                            type="text"
-                            placeholder="Destination"
-                            ref={destinationRef}
-                          />
+                          <Form.Control type="text" ref={destinationRef} placeholder="Destination" />
                         </Autocomplete>
                       </Form.Group>
                     </Col>
@@ -249,7 +181,7 @@ export default function PassengerDashboard() {
 
                   <Row className="mt-3">
                     {['Tuk', 'Bike', 'Car'].map((type) => (
-                      <Col key={type} md={4} className="mb-2">
+                      <Col key={type} md={4}>
                         <Card
                           border={vehicleType === type ? 'primary' : 'light'}
                           className="text-center"
@@ -257,7 +189,6 @@ export default function PassengerDashboard() {
                             setVehicleType(type);
                             setShowModal(true);
                           }}
-                          style={{ cursor: 'pointer' }}
                         >
                           <Card.Body>
                             {type === 'Tuk' && <FaTaxi size={30} />}
@@ -266,69 +197,54 @@ export default function PassengerDashboard() {
                             <Card.Title>{type}</Card.Title>
                             <Card.Text>Cost: LKR {calculateCost(distance, type)}</Card.Text>
                           </Card.Body>
+
                         </Card>
                       </Col>
                     ))}
                   </Row>
-
-                  <Row className="mt-3">
-                    <Col>
-                      <Button
-                        variant="primary"
-                        onClick={handleBooking}
-                        disabled={!directionsResponse || !selectedVehicle}
-                      >
-                        Book Ride
-                      </Button>
-                    </Col>
-                  </Row>
-
-                  <Row className="mt-3">
-                    <Col>
-                      <h6>Distance: {distance}</h6>
-                      <h6>Duration: {duration}</h6>
-                      <h6>Cost: LKR {cost}</h6>
-                    </Col>
-                  </Row>
+                  
+                  {distance && (
+                    <Row className="mt-3">
+                      <Col>
+                        <p>Distance: {distance}</p>
+                        <p>Duration: {duration}</p>
+                        <p>Cost: LKR {cost}</p>
+                      </Col>
+                    </Row>
+                  )}
                 </Form>
               </Card.Body>
             </Card>
           </Col>
         </Row>
 
-        <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
-            <Modal.Title>Available {vehicleType}s</Modal.Title>
+            <Modal.Title>Select Your {vehicleType}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <ListGroup>
-              {availableVehicles[vehicleType].map((vehicle) => (
-                <ListGroup.Item
-                  key={vehicle.id}
-                  action
-                  onClick={() => setSelectedVehicle(vehicle)}
-                  active={selectedVehicle && selectedVehicle.id === vehicle.id}
-                  className="d-flex align-items-center"
-                >
-                  <img
-                    src={vehicle.imageUrl}
-                    alt={'${vehicleType} vehicle'}
-                    style={{ width: '50px', height: '50px', marginRight: '15px' }}
-                  />
-                  <div>
-                    <h5>{vehicleType}</h5>
-                    <p className="mb-0">Vehicle No: {vehicle.no}</p>
-                  </div>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
+            {availableVehicles[vehicleType]?.length ? (
+              <ListGroup>
+                {availableVehicles[vehicleType].map((vehicle) => (
+                  <ListGroup.Item
+                    key={vehicle.id}
+                    active={selectedVehicle?.id === vehicle.id}
+                    onClick={() => setSelectedVehicle(vehicle)}
+                  >
+                    {vehicle.vehicleNumber} - {vehicle.vehicleType} - {vehicle.vehicleColor}
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            ) : (
+              <p>No available {vehicleType}s at the moment.</p>
+            )}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={confirmVehicleSelection} disabled={!selectedVehicle}>
-              Confirm Selection
+            <Button variant="primary" onClick={confirmVehicleSelection}>
+              Confirm
             </Button>
           </Modal.Footer>
         </Modal>
