@@ -19,7 +19,7 @@ export default function NavBar() {
         
         <Navbar.Brand href="#">
        
-          City Taxi
+        <h3 style={{ color: "#f1c40f" }}>City-Taxi</h3>
           </Navbar.Brand>
         <Navbar.Toggle 
           aria-controls="navbarScroll" 
