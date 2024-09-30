@@ -6,14 +6,15 @@ import {
   Autocomplete,
   DirectionsRenderer,
 } from '@react-google-maps/api';
-import { Form, Button, InputGroup, Dropdown, Card, Row, Col } from 'react-bootstrap';
+import { Form, Button, InputGroup, Card, Row, Col } from 'react-bootstrap';
 
-const center = { lat: 6.927079, lng: 79.861244 }; // Default center (Colombo, Sri Lanka)
+// Default center (Colombo, Sri Lanka)
+const center = { lat: 6.927079, lng: 79.861244 };
 
-function MapComponent() {
+function MapComponent({ currentLocation, destination, onBookingDataChange }) {
   // Load Google Maps API
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "your_api-key",
+    googleMapsApiKey: "your_api-key", // Replace with your API key
     libraries: ['places'], // Include necessary libraries
   });
 
@@ -22,44 +23,36 @@ function MapComponent() {
   const [distance, setDistance] = useState('');
   const [duration, setDuration] = useState('');
   const [cost, setCost] = useState(0);
-  const [currentLocation, setCurrentLocation] = useState(center);
+  const [mapCenter, setMapCenter] = useState(center); // State for the map's center
+  const [mapVisible, setMapVisible] = useState(true);
   const [currentPlaceName, setCurrentPlaceName] = useState('');
-  const [vehicleType, setVehicleType] = useState('standard');
-  
-  const destinationRef = useRef(); // Destination reference for Autocomplete input
+  const destinationRef = useRef();
 
   // Function to calculate cost based on distance, duration, and vehicle type
-  function calculateCost(distance, vehicleType) {
-    const rates = {
-      standard: { costPerKilometer: 350, costPerMinute: 350 },
-      bike: { costPerKilometer: 200, costPerMinute: 200 },
-      luxury: { costPerKilometer: 750, costPerMinute: 750 },
-    };
-
+  function calculateCost(distance, duration) {
     const distanceValue = parseFloat(distance.replace(/ km/, '').replace(',', '.'));
     const durationValue = parseFloat(duration.replace(/ mins/, '').replace(',', '.'));
 
-    const selectedRate = rates[vehicleType] || rates.standard;
+    const costPerKilometer = 350; // Example rate per km
+    const costPerMinute = 100; // Example rate per minute
+    const totalCost = (costPerKilometer * distanceValue) + (costPerMinute * durationValue);
 
-    const totalCost = (selectedRate.costPerKilometer * distanceValue) + (selectedRate.costPerMinute * durationValue);
     if (isNaN(totalCost)) {
       return 0;
     }
-
-    // Format the cost with commas and two decimal places
     return totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // Get the current location when the component is mounted
+  // Fetch the current location using browser's Geolocation API when the component is mounted
   useEffect(() => {
     if (navigator.geolocation && isLoaded) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           const location = { lat: latitude, lng: longitude };
-          setCurrentLocation(location);
+          setMapCenter(location);
 
-          // Using google after isLoaded is true
+          // Use Geocoder to get the address of the current location
           const geocoder = new window.google.maps.Geocoder();
           geocoder.geocode({ location }, (results, status) => {
             if (status === window.google.maps.GeocoderStatus.OK && results[0]) {
@@ -72,15 +65,20 @@ function MapComponent() {
         }
       );
     }
-  }, [isLoaded]); // Ensure it runs after isLoaded is true
+  }, [isLoaded]);
 
-  // Function to calculate route
-  async function calculateRoute(destination) {
-    if (!destination) return;
+  // Function to calculate route between currentLocation and destination
+  useEffect(() => {
+    if (currentLocation && destination) {
+      calculateRoute(currentLocation, destination);
+    }
+  }, [currentLocation, destination]);
 
+  // Function to calculate and display the route
+  async function calculateRoute(origin, destination) {
     const directionsService = new window.google.maps.DirectionsService();
     const results = await directionsService.route({
-      origin: currentLocation,
+      origin,
       destination,
       travelMode: window.google.maps.TravelMode.DRIVING,
     });
@@ -89,50 +87,40 @@ function MapComponent() {
     const routeDistance = results.routes[0].legs[0].distance.text;
     const routeDuration = results.routes[0].legs[0].duration.text;
 
-    const rideCost = calculateCost(routeDistance, vehicleType);
+    const rideCost = calculateCost(routeDistance, routeDuration);
     setCost(rideCost);
     setDistance(routeDistance);
     setDuration(routeDuration);
-  }
 
-  // Clear the route and reset fields
-  function clearRoute() {
-    setDirectionsResponse(null);
-    setDistance('');
-    setDuration('');
-    setCost(0);
-    destinationRef.current.value = '';
-  }
-
-  // Function to handle booking
-  function handleBooking() {
+    // Send the updated booking data to the parent component
     const bookingData = {
-      currentLocation,
-      currentPlaceName,
-      destination: destinationRef.current.value,
-      distance,
-      duration,
-      cost,
-      
+      currentLocation: origin,
+      destination,
+      distance: routeDistance,
+      duration: routeDuration,
+      cost: rideCost,
     };
 
-    console.log('Booking data:', bookingData);
   }
 
-  if (!isLoaded) {
-    return <div>Loading...</div>; // Don't render map until API is loaded
+  const closeMap = () => {
+    setMapVisible(false); // Set the map visibility to false
+  };
+
+  if (!isLoaded || !mapVisible) {
+    return null; // Don't render the map if not loaded or if it's closed
   }
 
   return (
     <div>
       {/* Full-screen Google Map */}
       <GoogleMap
-        center={currentLocation}
+        center={currentLocation || center}
         zoom={14}
         mapContainerStyle={{ width: '100%', height: '535px' }}
         onLoad={(mapInstance) => setMap(mapInstance)}
       >
-        <Marker position={currentLocation} />
+        <Marker position={currentLocation || center} />
         {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
       </GoogleMap>
 
@@ -145,37 +133,38 @@ function MapComponent() {
                 <Form.Control
                   type="text"
                   placeholder="Current Location"
-                  value={currentPlaceName}
+                  value={currentLocation ? currentLocation : 'Unknown'}
                   readOnly
                 />
               </InputGroup>
             </Col>
             <Col md={6}>
-              <Autocomplete onPlaceChanged={() => calculateRoute(destinationRef.current.value)}>
-                <Form.Control
-                  type="text"
-                  placeholder="Destination"
-                  ref={destinationRef}
-                />
-              </Autocomplete>
+              <Form.Control
+                type="text"
+                placeholder="Destination"
+                ref={destinationRef}
+                value={destination ? destination : ''}
+                readOnly
+              />
             </Col>
-           
           </Row>
 
           <Row className="mt-1">
-            
             <Col md={4}>
-              <p>Distance: {distance ? distance : 0}</p>
+              <p>Distance: {distance ? distance : 0} </p>
             </Col>
             <Col md={4}>
-              <p>Duration: {duration ? duration : 0}</p>
+              <p>Duration: {duration ? duration : 0} </p>
             </Col>
             <Col md={4}>
               <p>Total Cost: LKR {cost}</p>
             </Col>
           </Row>
 
-
+          {/* Close Button */}
+          <Button variant="secondary" onClick={closeMap}>
+            Close
+          </Button>
         </Card.Body>
       </Card>
     </div>

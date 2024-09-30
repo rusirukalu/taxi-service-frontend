@@ -56,24 +56,33 @@ function RideBooking() {
   // Calculate route and price
   async function calculateRoute() {
     if (originRef.current.value === '' || destinationRef.current.value === '') {
+      alert('Please enter both origin and destination');
       return;
     }
-
-    /* global google */
-    const directionsService = new google.maps.DirectionsService();
-    const results = await directionsService.route({
-      origin: originRef.current.value,
-      destination: destinationRef.current.value,
-      travelMode: google.maps.TravelMode.DRIVING,
-    });
-    setDirectionsResponse(results);
-    const distanceInKm = parseFloat(results.routes[0].legs[0].distance.text.replace(' km', ''));
-    setDistance(results.routes[0].legs[0].distance.text);
-    setDuration(results.routes[0].legs[0].duration.text);
-
-    // Calculate price based on distance and selected vehicle
-    const calculatedPrice = distanceInKm * vehiclePrices[selectedVehicle];
-    setPrice(calculatedPrice.toFixed(2)); // Round to 2 decimal places
+  
+    // Log values
+    console.log('Origin:', originRef.current.value);
+    console.log('Destination:', destinationRef.current.value);
+  
+    try {
+      const directionsService = new window.google.maps.DirectionsService();
+      const results = await directionsService.route({
+        origin: originRef.current.value,
+        destination: destinationRef.current.value,
+        travelMode: window.google.maps.TravelMode.DRIVING,
+      });
+      setDirectionsResponse(results);
+  
+      const distanceInKm = parseFloat(results.routes[0].legs[0].distance.text.replace(' km', ''));
+      setDistance(results.routes[0].legs[0].distance.text);
+      setDuration(results.routes[0].legs[0].duration.text);
+  
+      const calculatedPrice = distanceInKm * vehiclePrices[selectedVehicle];
+      setPrice(calculatedPrice.toFixed(2));
+    } catch (error) {
+      console.error('Error calculating route:', error);
+      alert('Error calculating route. Please try again.');
+    }
   }
 
   // Clear route and input fields

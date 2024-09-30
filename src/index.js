@@ -6,7 +6,6 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 
-
 const container = document.getElementById('root');
 const root = createRoot(container); // createRoot is used in React 18
 
