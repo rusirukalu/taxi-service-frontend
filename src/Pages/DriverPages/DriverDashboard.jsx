@@ -9,15 +9,20 @@ import EditProfileModal from '../../components/Driver/EditProfileModal';
 import MapComponent from '../../components/Driver/MapComponent';
 import RidesTable from '../../components/Driver/RidesTable';
 import RegisterVehicle from '../../components/Driver/RegisterVehicle ';
-
+import UpdateVehicle from '../../components/Driver/UpdateVehicle'
+import ChatComponent from '../../components/Driver/ChatComponent';
 import axios from 'axios';
 
 
 
 export default function DriverDashboard() {
   const [driver, setDriver] = useState({ fullName: '', email: '', username: '', nic: '', phone: '', address: '' });
+  const [vehicles, setVehicles] = useState({ ImagePath:'', vehicleNumber: '', vehicleModel: '' });
   const [showModal, setShowModal] = useState(false);  // Modal visibility state
   const [showVehicleModal, setShowVehicleModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false); // Control modal visibility
+  const [selectedVehicleNumber, setSelectedVehicleNumber] = useState(''); // For storing selected vehicle number
+
   const [editName, setEditName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editUsername, setEditUsername] = useState('');
@@ -25,6 +30,7 @@ export default function DriverDashboard() {
   const [editPhone, setEditPhone] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [totalRideCount, setTotalRideCount] = useState('');
+  const [totalEarnings, setTotalEarnings] = useState(0); // Add state for total earnings
   const navigate = useNavigate();
 
   //--------------fetch driver------------------//
@@ -64,6 +70,32 @@ export default function DriverDashboard() {
         }).catch(err => {
           console.log(err)
         })
+
+      // Fetch Total Earnings
+      axios.post('http://localhost:3000/api/v1/driver/total-earnings', {
+        driverId: userDetailsParse.id
+      })
+        .then(res => {
+          setTotalEarnings(res.data.message); // Set total earnings in state
+        })
+        .catch(err => {
+          console.log(err);
+        });
+
+
+      // Fetch vehicles for the driver
+      axios.post('http://localhost:3000/api/v1/vehicle/get-vehicles-by-driver', {
+        driverId: userDetailsParse.id
+      })
+        .then(res => {
+          setVehicles(res.data.vehicles); // Set vehicles in state
+        })
+        .catch(err => {
+          console.log('Error fetching vehicle details:', err);
+        });
+
+
+
     }
   }, [navigate]);
 
@@ -78,6 +110,15 @@ export default function DriverDashboard() {
 
   // Handle modal close for vehicle registration  
   const handleCloseVehicleModal = () => setShowVehicleModal(false);
+
+  // Handle modal open for vehicle update
+  const handleShowUpdateModal = (vehicleNumber) => {
+    setSelectedVehicleNumber(vehicleNumber); // Set selected vehicle number to update
+    setShowUpdateModal(true); // Open the modal
+  };
+
+  const handleCloseUpdateModal = () => setShowUpdateModal(false); // Close the modal
+
 
 
   // Handle form submission (e.g., update profile)
@@ -113,14 +154,16 @@ export default function DriverDashboard() {
 
           {/*Driver Dashboard Title */}
           <Col md={4} className="d-flex justify-content-center">
-            <h2 style={{ color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center',
+            <h2 style={{
+              color: 'orange', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', textAlign: 'center',
               textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)'
-             }}>
+            }}>
               Driver's Dashboard
+
             </h2>
           </Col>
 
-          
+
 
           {/*Logout Button */}
           <Col md={4} className="d-flex justify-content-center">
@@ -134,11 +177,14 @@ export default function DriverDashboard() {
         {/* Summary Cards */}
         <Row className="mb-4">
           <Col md={4}>
-            <Card className="text-center">
+            <Card className="text-center"
+            style={{
+              background: 'linear-gradient(125deg, #ecf0f1, #FFA500,  #ecf0f1)', 
+            }}>
               <Card.Body>
-                <Card.Title>Today's Earnings</Card.Title>
+                <Card.Title>Monthly Earnings</Card.Title>
                 <Card.Text>
-                  <h3>Rs. 1200.50</h3>
+                  <h3>Rs. {totalEarnings.toFixed(2)}</h3>
                 </Card.Text>
                 <Button variant="primary">View Details</Button>
               </Card.Body>
@@ -146,7 +192,10 @@ export default function DriverDashboard() {
           </Col>
 
           <Col md={4}>
-            <Card className="text-center">
+            <Card className="text-center"
+            style={{
+              background: 'linear-gradient(125deg, #ecf0f1, #FFA500,  #ecf0f1)', 
+            }}>
               <Card.Body>
                 <Card.Title>Total Rides</Card.Title>
                 <Card.Text>
@@ -160,7 +209,10 @@ export default function DriverDashboard() {
           </Col>
 
           <Col md={4}>
-            <Card className="text-center">
+            <Card className="text-center"
+            style={{
+              background: 'linear-gradient(125deg, #ecf0f1, #FFA500,  #ecf0f1)', 
+            }}>
               <Card.Body>
                 <Card.Title>Rating</Card.Title>
                 <Card.Text>
@@ -206,21 +258,37 @@ export default function DriverDashboard() {
             <br />
 
             <Card className="mb-4">
-              <Card.Header>Vehicle Details</Card.Header>
-              <Card.Body className="text-center">
-                {/* Display Driver's Profile Image */}
-                <Image
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHgVoBr3mBhjiroEm4lwp_j8nts8q661M-Pw&s"
-                  roundedCircle
-                  fluid
-                  style={{ width: '120px', height: '120px' }}
-                  alt="Vehicle Details"
-                />
-                <p className="mt-3"><strong>Vehicle Number: </strong>{driver?.name || 'Loading...'}</p>
-                <p><strong>Vehicle Type: </strong>{driver?.name || 'Loading...'}</p>
-                <Button variant="success" onClick={handleShowVehicleModal}><strong>Update</strong></Button>
-              </Card.Body>
-            </Card>
+  <Card.Header>Vehicle Details</Card.Header>
+  <Card.Body className="text-center">
+    {vehicles.length > 0 ? (
+      vehicles.map((vehicle) => (
+        <div key={vehicle.vehicleNumber} className="mb-3">
+          <UpdateVehicle
+            show={showUpdateModal} // Pass the modal visibility state
+            handleClose={handleCloseUpdateModal} // Pass the function to close the modal
+            vehicleNumber={selectedVehicleNumber} // Pass the selected vehicle number
+          />
+          {/* Display Vehicle Image */}
+          <Image
+            src={vehicle.ImagePath}
+            roundedCircle
+            fluid
+            style={{ width: '120px', height: '120px' }}
+            alt="Vehicle Details"
+          />
+          <p className="mt-3"><strong>Vehicle Number: </strong>{vehicle.vehicleNumber}</p>
+          <p><strong>Vehicle Type: </strong>{vehicle.vehicleModel}</p>
+          <Button variant="success" onClick={() => handleShowUpdateModal(vehicle.vehicleNumber)}>
+            <strong>Update</strong>
+          </Button>
+        </div>
+      ))
+    ) : (
+      <p>Loading vehicles...</p>
+    )}
+  </Card.Body>
+</Card>
+
 
             {/* Use the EditProfileModal component */}
             <EditProfileModal
@@ -261,8 +329,9 @@ export default function DriverDashboard() {
 
         </Row>
       </Container>
-
+      {/*<ChatComponent />*/}
       <Footer />
+
     </div>
   );
 }

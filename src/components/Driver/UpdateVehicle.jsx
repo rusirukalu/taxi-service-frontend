@@ -1,29 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import ImageUploader from '../../utils/ImageUploader'
+import ImageUploader from '../../utils/ImageUploader';
 
-const RegisterVehicle = ({ show, handleClose }) => {
-  const [vehicleNumber, setVehicleNumber] = useState('');
-  const [vehicleType, setVehicleType] = useState('car'); // Default vehicle type
+const UpdateVehicle = ({ show, handleClose, vehicleNumber }) => {
+  const [vehicleType, setVehicleType] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
   const [vehicleColor, setVehicleColor] = useState('');
-  const [vehicleOwner, setVehicleOwner] = useState('me'); // Default vehicle owner
+  const [vehicleOwner, setVehicleOwner] = useState('');
   const [vehicleCapacity, setVehicleCapacity] = useState(0);
   const [vehicleImageUrl, setVehicleImageUrl] = useState(''); // State to store image URL
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    // Fetch vehicle data when modal opens and vehicleNumber is provided
+    if (show && vehicleNumber) {
+      const fetchVehicleData = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/v1/vehicle/get-vehicle/${vehicleNumber}`);
+          const vehicleData = response.data.vehicle; // Assuming the vehicle data is in 'vehicle'
+          
+          setVehicleType(vehicleData.vehicleType);
+          setVehicleModel(vehicleData.vehicleModel);
+          setVehicleColor(vehicleData.vehicleColor);
+          setVehicleOwner(vehicleData.vehicleOwner);
+          setVehicleCapacity(vehicleData.seatingCapacity); // Assuming 'seatingCapacity' is the correct field
+          setVehicleImageUrl(vehicleData.ImagePath); // Assuming 'ImagePath' holds the URL
+        } catch (error) {
+            console.error('Error fetching vehicle details:', error.response?.data || error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchVehicleData();
+    }
+  }, [show, vehicleNumber]);
 
   // Handle image URL change
   const handleImageUrlChange = (newImageUrl) => {
     setVehicleImageUrl(newImageUrl);
-}
+  };
 
+  // Handle form submission to update vehicle
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/vehicle/create-vehicle', {
-        vehicleNumber,
+      const response = await axios.put(`http://localhost:3000/api/v1/vehicle/update-vehicle/${vehicleNumber}`, {
         vehicleType,
         vehicleModel,
         vehicleColor,
@@ -31,40 +57,41 @@ const RegisterVehicle = ({ show, handleClose }) => {
         vehicleCapacity: parseInt(vehicleCapacity),
         images: vehicleImageUrl,
       });
-      console.log('Vehicle registered:', response.data);
-      // SweetAlert success message
+
+      console.log('Vehicle updated:', response.data);
       Swal.fire({
         title: 'Success!',
-        text: 'Vehicle has been registered successfully.',
+        text: 'Vehicle details have been updated successfully.',
         icon: 'success',
         confirmButtonText: 'OK',
       });
-      // Close the modal after successful registration
-      handleClose();
-
+      handleClose(); // Close the modal after successful update
     } catch (error) {
-      console.error('Error registering vehicle:', error);
-      // SweetAlert error message
+      console.error('Error updating vehicle:', error);
       Swal.fire({
         title: 'Error!',
-        text: 'There was an error registering the vehicle.',
+        text: 'There was an error updating the vehicle.',
         icon: 'error',
         confirmButtonText: 'OK',
       });
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>; // Loading state
+  }
+
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Register Vehicle</Modal.Title>
+        <Modal.Title>Update Vehicle Details</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
           {/* Image Component */}
           <Form.Group>
             <Form.Label>Vehicle Image</Form.Label>
-            <ImageUploader onImageUrlChange={handleImageUrlChange} />
+            <ImageUploader onImageUrlChange={handleImageUrlChange} imageUrl={vehicleImageUrl} />
           </Form.Group>
 
           <Form.Group controlId="formVehicleNumber">
@@ -72,8 +99,7 @@ const RegisterVehicle = ({ show, handleClose }) => {
             <Form.Control
               type="text"
               value={vehicleNumber}
-              onChange={(e) => setVehicleNumber(e.target.value)}
-              required
+              disabled
             />
           </Form.Group>
 
@@ -112,13 +138,12 @@ const RegisterVehicle = ({ show, handleClose }) => {
             />
           </Form.Group>
 
-          {/* Seating Capacity */}
           <Form.Group controlId="formVehicleCapacity">
             <Form.Label>Seating Capacity</Form.Label>
             <Form.Control
               type="number"
               value={vehicleCapacity}
-              onChange={(e) => setVehicleCapacity(e.target.value)} // Ensure it's a number
+              onChange={(e) => setVehicleCapacity(e.target.value)}
               required
             />
           </Form.Group>
@@ -138,8 +163,8 @@ const RegisterVehicle = ({ show, handleClose }) => {
           </Form.Group>
 
           <br />
-          <Button variant="warning" type="submit">
-            Register
+          <Button variant="primary" type="submit">
+            Update Vehicle
           </Button>
         </Form>
       </Modal.Body>
@@ -147,4 +172,4 @@ const RegisterVehicle = ({ show, handleClose }) => {
   );
 };
 
-export default RegisterVehicle;
+export default UpdateVehicle;

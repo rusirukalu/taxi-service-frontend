@@ -19,7 +19,7 @@ export default function NavBar() {
         
         <Navbar.Brand href="#">
        
-          City Taxi
+        <h3 style={{ color: "#f1c40f" }}>City-Taxi</h3>
           </Navbar.Brand>
         <Navbar.Toggle 
           aria-controls="navbarScroll" 
@@ -32,6 +32,7 @@ export default function NavBar() {
             <Nav.Link href="#">About</Nav.Link>
             <Nav.Link href="./PassengerLogin">Passengers</Nav.Link>
             <Nav.Link href="./DriverLogin">Drivers</Nav.Link>
+            <Nav.Link href="./CallOperatorLogin">Call Operator</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>

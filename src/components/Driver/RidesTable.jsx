@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Badge } from 'react-bootstrap';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import MapComponent from './MapComponent';
+
 
 function RidesTable() {
   const [rides, setRides] = useState([]);
+  const [selectedRide, setSelectedRide] = useState(null);
 
   // Fetch the rides data from the backend API
   useEffect(() => {
@@ -15,42 +19,107 @@ function RidesTable() {
       const response = await axios.get('http://localhost:3000/api/v1/driver/ride-details'); // Adjust API endpoint
       setRides(response.data.message);
       console.log(response.data.message)
-      console.log()
+
+
     } catch (error) {
       console.error('Error fetching rides:', error);
     }
   };
 
+  // Function to handle viewing ride on the map
+  const viewRideOnMap = (ride) => {
+    setSelectedRide({
+      currentLocation: ride.pickupLocation,
+      destination: ride.dropLocation,
+    });
+  };
+
+  // Update the driver status
+  const updateDriverStatus = async (driverId, status) => {
+    try {
+        await axios.put(`http://localhost:3000/api/v1/driver/update-status/${driverId}`, {
+            status: status,
+        });
+    } catch (error) {
+        console.error("Error updating driver status: ", error);
+    }
+};
+
+
   // Handle confirming the ride
   const confirmRide = async (rideId) => {
-    try {
-      await axios.put(`/api/rides/${rideId}`, { status: 'confirmed' });
-      fetchRides(); // Refresh the list after updating
-    } catch (error) {
-      console.error('Error confirming ride:', error);
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you want to confirm this ride?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, confirm it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.put(`http://localhost:3000/api/v1/driver/rides/${rideId}`, { status: 'in-progress' });
+        await updateDriverStatus(rideId, 'busy');
+        Swal.fire('Confirmed!', 'Ride has been confirmed.', 'success');
+        fetchRides(); // Refresh the list after updating
+      } catch (error) {
+        console.error('Error confirming ride:', error);
+      }
     }
   };
 
-  // Handle rejecting the ride
-  const rejectRide = async (rideId) => {
-    try {
-      await axios.put(`/api/rides/${rideId}`, { status: 'rejected' });
-      fetchRides(); // Refresh the list after updating
-    } catch (error) {
-      console.error('Error rejecting ride:', error);
+   // Handle rejecting the ride
+   const rejectRide = async (rideId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you want to reject this ride?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, reject it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.put(`http://localhost:3000/api/v1/driver/rides/${rideId}`, { status: 'rejected' });
+        await updateDriverStatus(rideId, 'available'); // Set driver status to available after rejection
+        Swal.fire('Rejected!', 'Ride has been rejected.', 'success');
+        fetchRides(); // Refresh the list after updating
+      } catch (error) {
+        console.error('Error rejecting ride:', error);
+      }
     }
   };
 
+ // Handle completing the ride
+ const completeRide = async (rideId) => {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "Do you want to complete this ride?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, complete it!'
+  });
 
-  // Handle completing the ride
-  const completeRide = async (rideId) => {
+  if (result.isConfirmed) {
     try {
-      await axios.put(`/api/rides/${rideId}`, { status: 'completed' });
+      await axios.put(`http://localhost:3000/api/v1/driver/rides/${rideId}`, { status: 'completed' });
+      await updateDriverStatus(rideId, 'available'); // Set driver status to available after completion
+      Swal.fire('Completed!', 'Ride has been completed.', 'success');
       fetchRides(); // Refresh the list after updating
     } catch (error) {
       console.error('Error completing ride:', error);
     }
+  }
   };
+
+  
+
 
   return (
     <div>
@@ -83,14 +152,14 @@ function RidesTable() {
               <td>{ride.distance}</td>
               <td>LKR {ride.cost}</td>
               <td>
-                <Badge
+              <Badge
                   bg={
-                    ride.status === 'confirmed'
-                      ? 'success'
+                    ride.status === 'completed'
+                      ? 'info'
                       : ride.status === 'rejected'
                         ? 'danger'
-                        : ride.status === 'completed'
-                          ? 'info'
+                        : ride.status === 'in-progress'
+                          ? 'success'
                           : 'warning'
                   }
                 >
@@ -102,31 +171,46 @@ function RidesTable() {
                   variant="success"
                   className="me-2"
                   onClick={() => confirmRide(ride.id)}
-                  disabled={ride.status !== 'pending'}
+                  disabled={ride.status !== 'pending'} // Only disable if not pending
                 >
                   Confirm
                 </Button>
                 <Button
                   variant="danger"
                   onClick={() => rejectRide(ride.id)}
-                  disabled={ride.status !== 'pending'}
+                  disabled={ride.status !== 'pending'} // Only disable if not pending
                 >
                   Reject
                 </Button>
-
                 <Button
                   variant="info"
                   className="me-2"
                   onClick={() => completeRide(ride.id)}
-                  disabled={ride.status !== 'pending'}
+                  disabled={ride.status !== 'in-progress'} // Enable only if status is in-progress
                 >
                   Complete
+                </Button>
+                <Button
+                  variant="info"
+                  className="me-2"
+                  onClick={() => viewRideOnMap(ride)}
+                >
+                  View
                 </Button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
+      {selectedRide && (
+  <MapComponent
+    key={selectedRide.id}  // Use a unique key to ensure re-rendering
+    currentLocation={selectedRide.currentLocation}
+    destination={selectedRide.destination}
+  />
+)}
+
+      
     </div>
   );
 }
